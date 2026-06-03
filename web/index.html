@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Society Management App - Smart living for owners & tenants">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Society App">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Society App</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #1E88E5 100%);
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    #loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .logo-box {
+      width: 96px;
+      height: 96px;
+      background: #ffffff;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+      animation: pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .logo-box svg { width: 56px; height: 56px; fill: #1565C0; }
+
+    .app-title {
+      margin-top: 24px;
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.3s forwards;
+    }
+
+    .app-subtitle {
+      margin-top: 6px;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 14px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.5s forwards;
+    }
+
+    .spinner {
+      margin-top: 40px;
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      opacity: 0;
+      animation: spin 0.8s linear infinite, fadeUp 0.6s ease 0.7s forwards;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      0% { transform: translateY(12px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Branded loading screen (shown until Flutter is ready) -->
+  <div id="loading">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg>
+    </div>
+    <div class="app-title">Society App</div>
+    <div class="app-subtitle">Smart Society Management</div>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // Remove loading screen once Flutter has painted its first frame
+    window.addEventListener('flutter-first-frame', function () {
+      var loader = document.getElementById('loading');
+      if (loader) {
+        loader.classList.add('hidden');
+        setTimeout(function () { loader.remove(); }, 600);
+      }
+    });
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
