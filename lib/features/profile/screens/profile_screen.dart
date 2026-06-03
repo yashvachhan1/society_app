@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/widgets.dart';
+import '../models/profile_menu_item.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  static const List<Map<String, dynamic>> _menuItems = [
-    {
-      'icon': Icons.folder_outlined,
-      'label': 'My Documents',
-      'subtitle': 'Upload & manage KYC docs',
-      'color': Color(0xFF1565C0),
-    },
-    {
-      'icon': Icons.notifications_none,
-      'label': 'Notification Preferences',
-      'subtitle': 'Manage alert settings',
-      'color': Color(0xFF00ACC1),
-    },
-    {
-      'icon': Icons.lock_outline,
-      'label': 'Privacy & Security',
-      'subtitle': 'Change password, 2FA',
-      'color': Color(0xFF43A047),
-    },
-    {
-      'icon': Icons.help_outline,
-      'label': 'Help & Support',
-      'subtitle': 'FAQs, contact support',
-      'color': Color(0xFFFB8C00),
-    },
-    {
-      'icon': Icons.settings_outlined,
-      'label': 'Settings',
-      'subtitle': 'App preferences',
-      'color': Color(0xFF6B7280),
-    },
+  static const List<ProfileMenuItem> _menuItems = [
+    ProfileMenuItem(
+      icon: Icons.folder_outlined,
+      label: 'My Documents',
+      subtitle: 'Upload & manage KYC docs',
+      color: Color(0xFF1565C0),
+    ),
+    ProfileMenuItem(
+      icon: Icons.notifications_none,
+      label: 'Notification Preferences',
+      subtitle: 'Manage alert settings',
+      color: Color(0xFF00ACC1),
+    ),
+    ProfileMenuItem(
+      icon: Icons.lock_outline,
+      label: 'Privacy & Security',
+      subtitle: 'Change password, 2FA',
+      color: Color(0xFF43A047),
+    ),
+    ProfileMenuItem(
+      icon: Icons.help_outline,
+      label: 'Help & Support',
+      subtitle: 'FAQs, contact support',
+      color: Color(0xFFFB8C00),
+    ),
+    ProfileMenuItem(
+      icon: Icons.settings_outlined,
+      label: 'Settings',
+      subtitle: 'App preferences',
+      color: Color(0xFF6B7280),
+    ),
   ];
 
   @override
@@ -43,26 +48,30 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('My Profile'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () {}),
         ],
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: Column(
           children: [
             _ProfileHeader(),
-            const SizedBox(height: 12),
-            _ContactInfoCard(),
-            const SizedBox(height: 12),
-            _MenuSection(),
-            const SizedBox(height: 12),
-            _LogoutButton(),
-            const SizedBox(height: 24),
+            SizedBox(height: 12),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _ContactInfoCard(),
+            ),
+            SizedBox(height: 12),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _MenuSection(items: _menuItems),
+            ),
+            SizedBox(height: 12),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _LogoutButton(),
+            ),
+            SizedBox(height: 24),
           ],
         ),
       ),
@@ -71,6 +80,8 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -121,8 +132,7 @@ class _ProfileHeader extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: const Icon(Icons.verified,
-                      color: Colors.white, size: 14),
+                  child: const Icon(Icons.verified, color: Colors.white, size: 14),
                 ),
               ),
             ],
@@ -137,24 +147,14 @@ class _ProfileHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _HeaderChip(
-                icon: Icons.home_outlined,
-                label: 'Flat 301, Tower A',
-              ),
-            ],
+          const _HeaderChip(
+            icon: Icons.home_outlined,
+            label: 'Flat 301, Tower A',
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _HeaderChip(
-                icon: Icons.person_outline,
-                label: 'Owner — Self Occupied',
-              ),
-            ],
+          const _HeaderChip(
+            icon: Icons.person_outline,
+            label: 'Owner — Self Occupied',
           ),
         ],
       ),
@@ -163,10 +163,10 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 class _HeaderChip extends StatelessWidget {
+  const _HeaderChip({required this.icon, required this.label});
+
   final IconData icon;
   final String label;
-
-  const _HeaderChip({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -196,74 +196,61 @@ class _HeaderChip extends StatelessWidget {
 }
 
 class _ContactInfoCard extends StatelessWidget {
+  const _ContactInfoCard();
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+    return const AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Contact Details',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Contact Details',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _ContactRow(
-              icon: Icons.phone_outlined,
-              label: 'Mobile',
-              value: '+91 98765 43210',
-              color: AppColors.success,
-            ),
-            const Divider(color: AppColors.divider, height: 16),
-            _ContactRow(
-              icon: Icons.email_outlined,
-              label: 'Email',
-              value: 'rahul.sharma@gmail.com',
-              color: AppColors.primary,
-            ),
-            const Divider(color: AppColors.divider, height: 16),
-            _ContactRow(
-              icon: Icons.location_on_outlined,
-              label: 'Society',
-              value: 'Greenwood Heights, Pune',
-              color: AppColors.accent,
-            ),
-          ],
-        ),
+          ),
+          SizedBox(height: 12),
+          _ContactRow(
+            icon: Icons.phone_outlined,
+            label: 'Mobile',
+            value: '+91 98765 43210',
+            color: AppColors.success,
+          ),
+          Divider(color: AppColors.divider, height: 16),
+          _ContactRow(
+            icon: Icons.email_outlined,
+            label: 'Email',
+            value: 'rahul.sharma@gmail.com',
+            color: AppColors.primary,
+          ),
+          Divider(color: AppColors.divider, height: 16),
+          _ContactRow(
+            icon: Icons.location_on_outlined,
+            label: 'Society',
+            value: 'Greenwood Heights, Pune',
+            color: AppColors.accent,
+          ),
+        ],
       ),
     );
   }
 }
 
 class _ContactRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
   const _ContactRow({
     required this.icon,
     required this.label,
     required this.value,
     required this.color,
   });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -307,55 +294,34 @@ class _ContactRow extends StatelessWidget {
 }
 
 class _MenuSection extends StatelessWidget {
+  const _MenuSection({required this.items});
+
+  final List<ProfileMenuItem> items;
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            _MenuTile(item: items[i]),
+            if (i < items.length - 1)
+              const Divider(color: AppColors.divider, height: 1, indent: 62),
           ],
-        ),
-        child: Column(
-          children: [
-            ...ProfileScreen._menuItems.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              return Column(
-                children: [
-                  _MenuItem(item: item),
-                  if (index < ProfileScreen._menuItems.length - 1)
-                    const Divider(
-                      color: AppColors.divider,
-                      height: 1,
-                      indent: 62,
-                    ),
-                ],
-              );
-            }),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
 
-class _MenuItem extends StatelessWidget {
-  final Map<String, dynamic> item;
+class _MenuTile extends StatelessWidget {
+  const _MenuTile({required this.item});
 
-  const _MenuItem({required this.item});
+  final ProfileMenuItem item;
 
   @override
   Widget build(BuildContext context) {
-    final color = item['color'] as Color;
-
     return InkWell(
       onTap: () {},
       borderRadius: BorderRadius.circular(16),
@@ -367,10 +333,10 @@ class _MenuItem extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: item.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(item['icon'] as IconData, color: color, size: 20),
+              child: Icon(item.icon, color: item.color, size: 20),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -378,7 +344,7 @@ class _MenuItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item['label'] as String,
+                    item.label,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -386,7 +352,7 @@ class _MenuItem extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    item['subtitle'] as String,
+                    item.subtitle,
                     style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.textSecondary,
@@ -405,68 +371,46 @@ class _MenuItem extends StatelessWidget {
 }
 
 class _LogoutButton extends StatelessWidget {
+  const _LogoutButton();
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+    return AppCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      onTap: () => _showLogoutDialog(context),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
-        ),
-        child: InkWell(
-          onTap: () => _showLogoutDialog(context),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.logout,
-                      color: AppColors.error, size: 20),
-                ),
-                const SizedBox(width: 14),
-                const Text(
-                  'Logout',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.error,
-                  ),
-                ),
-                const Spacer(),
-                const Icon(Icons.arrow_forward_ios,
-                    size: 14, color: AppColors.error),
-              ],
+            child: const Icon(Icons.logout, color: AppColors.error, size: 20),
+          ),
+          const SizedBox(width: 14),
+          const Text(
+            'Logout',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.error,
             ),
           ),
-        ),
+          const Spacer(),
+          const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.error),
+        ],
       ),
     );
   }
 
   void _showLogoutDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Logout',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
+        title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w700)),
         content: const Text(
           'Are you sure you want to log out from this device?',
         ),
@@ -476,12 +420,14 @@ class _LogoutButton extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.go(AppRoutes.login);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
               minimumSize: Size.zero,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
             child: const Text('Logout'),
           ),

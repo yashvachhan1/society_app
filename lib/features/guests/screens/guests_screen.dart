@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/widgets.dart';
+import '../models/guest.dart';
 
 class GuestsScreen extends StatefulWidget {
   const GuestsScreen({super.key});
@@ -10,43 +13,38 @@ class GuestsScreen extends StatefulWidget {
 
 class _GuestsScreenState extends State<GuestsScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  static const List<Map<String, dynamic>> _guestLog = [
-    {
-      'name': 'Ankit Mehta',
-      'relation': 'Friend',
-      'checkIn': '3 May 2025, 4:15 PM',
-      'checkOut': '3 May 2025, 8:00 PM',
-      'flat': '301',
-      'vehicleNo': 'MH12AB1234',
-      'status': 'Exited',
-    },
-    {
-      'name': 'Priya & Rajesh Sharma',
-      'relation': 'Relatives',
-      'checkIn': '1 May 2025, 11:00 AM',
-      'checkOut': '2 May 2025, 10:30 AM',
-      'flat': '301',
-      'vehicleNo': '—',
-      'status': 'Exited',
-    },
-    {
-      'name': 'Swiggy Delivery',
-      'relation': 'Delivery',
-      'checkIn': '30 Apr 2025, 7:45 PM',
-      'checkOut': '30 Apr 2025, 7:52 PM',
-      'flat': '301',
-      'vehicleNo': 'MH01ZZ9999',
-      'status': 'Exited',
-    },
+  static const List<Guest> _guestLog = [
+    Guest(
+      name: 'Ankit Mehta',
+      relation: 'Friend',
+      checkIn: '3 May 2025, 4:15 PM',
+      checkOut: '3 May 2025, 8:00 PM',
+      flat: '301',
+      vehicleNo: 'MH12AB1234',
+      status: 'Exited',
+    ),
+    Guest(
+      name: 'Priya & Rajesh Sharma',
+      relation: 'Relatives',
+      checkIn: '1 May 2025, 11:00 AM',
+      checkOut: '2 May 2025, 10:30 AM',
+      flat: '301',
+      vehicleNo: '—',
+      status: 'Exited',
+    ),
+    Guest(
+      name: 'Swiggy Delivery',
+      relation: 'Delivery',
+      checkIn: '30 Apr 2025, 7:45 PM',
+      checkOut: '30 Apr 2025, 7:52 PM',
+      flat: '301',
+      vehicleNo: 'MH01ZZ9999',
+      status: 'Exited',
+    ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+  late final TabController _tabController =
+      TabController(length: 2, vsync: this);
 
   @override
   void dispose() {
@@ -60,8 +58,6 @@ class _GuestsScreenState extends State<GuestsScreen>
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Guest Management'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -75,9 +71,9 @@ class _GuestsScreenState extends State<GuestsScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           _GuestLogTab(guestLog: _guestLog),
-          const _QRCodesTab(),
+          _QrCodesTab(),
         ],
       ),
     );
@@ -85,16 +81,16 @@ class _GuestsScreenState extends State<GuestsScreen>
 }
 
 class _GuestLogTab extends StatelessWidget {
-  final List<Map<String, dynamic>> guestLog;
-
   const _GuestLogTab({required this.guestLog});
+
+  final List<Guest> guestLog;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          color: Colors.white,
+          color: AppColors.surface,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
@@ -112,11 +108,11 @@ class _GuestLogTab extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: ListView.builder(
+          child: ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: guestLog.length,
-            itemBuilder: (context, index) =>
-                _GuestCard(guest: guestLog[index]),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (_, i) => _GuestCard(guest: guestLog[i]),
           ),
         ),
       ],
@@ -125,26 +121,14 @@ class _GuestLogTab extends StatelessWidget {
 }
 
 class _GuestCard extends StatelessWidget {
-  final Map<String, dynamic> guest;
-
   const _GuestCard({required this.guest});
+
+  final Guest guest;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -154,7 +138,7 @@ class _GuestCard extends StatelessWidget {
                 radius: 22,
                 backgroundColor: AppColors.accent.withValues(alpha: 0.15),
                 child: Text(
-                  (guest['name'] as String)[0].toUpperCase(),
+                  guest.initial,
                   style: const TextStyle(
                     color: AppColors.accent,
                     fontWeight: FontWeight.w700,
@@ -168,82 +152,41 @@ class _GuestCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      guest['name'] as String,
+                      guest.name,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        guest['relation'] as String,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.accent,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 4),
+                    StatusChip(label: guest.relation, color: AppColors.accent),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Exited',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+              StatusChip.forStatus(guest.status),
             ],
           ),
           const SizedBox(height: 12),
           const Divider(color: AppColors.divider, height: 1),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoRow(
-                  icon: Icons.login,
-                  label: 'Check-in',
-                  value: guest['checkIn'] as String,
-                ),
-              ),
-            ],
+          _InfoRow(
+            icon: Icons.login,
+            label: 'Check-in',
+            value: guest.checkIn,
           ),
           const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoRow(
-                  icon: Icons.logout,
-                  label: 'Check-out',
-                  value: guest['checkOut'] as String,
-                ),
-              ),
-            ],
+          _InfoRow(
+            icon: Icons.logout,
+            label: 'Check-out',
+            value: guest.checkOut,
           ),
-          if (guest['vehicleNo'] != '—') ...[
+          if (guest.hasVehicle) ...[
             const SizedBox(height: 6),
             _InfoRow(
               icon: Icons.directions_car_outlined,
               label: 'Vehicle',
-              value: guest['vehicleNo'] as String,
+              value: guest.vehicleNo,
             ),
           ],
         ],
@@ -253,15 +196,15 @@ class _GuestCard extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
   const _InfoRow({
     required this.icon,
     required this.label,
     required this.value,
   });
+
+  final IconData icon;
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
@@ -271,17 +214,16 @@ class _InfoRow extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           '$label: ',
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
       ],
@@ -289,87 +231,30 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _QRCodesTab extends StatelessWidget {
-  const _QRCodesTab();
+class _QrCodesTab extends StatelessWidget {
+  const _QrCodesTab();
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(24),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.divider, width: 2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.qr_code_2,
-                          size: 80,
-                          color: AppColors.textSecondary.withValues(alpha: 0.3)),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'No active QR',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Generate a QR code to let your guests check in without calling you.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.qr_code),
-                  label: const Text('Generate QR Code'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          _QROptionCard(
+          _QrPreviewCard(),
+          SizedBox(height: 20),
+          _QrOptionCard(
             icon: Icons.access_time,
             title: 'Timed QR (4 hrs)',
             description: 'Valid for a single entry within 4 hours.',
           ),
-          const SizedBox(height: 10),
-          _QROptionCard(
+          SizedBox(height: 10),
+          _QrOptionCard(
             icon: Icons.calendar_month_outlined,
             title: 'Day Pass QR',
             description: 'Valid for the entire day.',
           ),
-          const SizedBox(height: 10),
-          _QROptionCard(
+          SizedBox(height: 10),
+          _QrOptionCard(
             icon: Icons.repeat,
             title: 'Recurring QR',
             description: 'For household staff — valid every day.',
@@ -380,26 +265,78 @@ class _QRCodesTab extends StatelessWidget {
   }
 }
 
-class _QROptionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
+class _QrPreviewCard extends StatelessWidget {
+  const _QrPreviewCard();
 
-  const _QROptionCard({
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: const EdgeInsets.all(24),
+      borderRadius: 20,
+      child: Column(
+        children: [
+          Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.divider, width: 2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.qr_code_2,
+                    size: 80,
+                    color: AppColors.textSecondary.withValues(alpha: 0.3)),
+                const SizedBox(height: 8),
+                const Text(
+                  'No active QR',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Generate a QR code to let your guests check in without calling you.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.qr_code),
+            label: const Text('Generate QR Code'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QrOptionCard extends StatelessWidget {
+  const _QrOptionCard({
     required this.icon,
     required this.title,
     required this.description,
   });
 
+  final IconData icon;
+  final String title;
+  final String description;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.divider),
-      ),
+      onTap: () {},
       child: Row(
         children: [
           Container(

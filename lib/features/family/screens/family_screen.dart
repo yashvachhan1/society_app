@@ -1,52 +1,50 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/widgets.dart';
+import '../models/family_member.dart';
 
 class FamilyScreen extends StatelessWidget {
   const FamilyScreen({super.key});
 
-  static const List<Map<String, dynamic>> _members = [
-    {
-      'name': 'Rahul Sharma',
-      'relation': 'Self',
-      'age': 35,
-      'gender': 'Male',
-      'phone': '+91 98765 43210',
-      'kyc': 'Verified',
-      'avatar': 'RS',
-    },
-    {
-      'name': 'Priya Sharma',
-      'relation': 'Spouse',
-      'age': 32,
-      'gender': 'Female',
-      'phone': '+91 91234 56789',
-      'kyc': 'Verified',
-      'avatar': 'PS',
-    },
-    {
-      'name': 'Aryan Sharma',
-      'relation': 'Son',
-      'age': 8,
-      'gender': 'Male',
-      'phone': '—',
-      'kyc': 'Pending',
-      'avatar': 'AS',
-    },
+  static const List<FamilyMember> _members = [
+    FamilyMember(
+      name: 'Rahul Sharma',
+      relation: 'Self',
+      age: 35,
+      gender: 'Male',
+      phone: '+91 98765 43210',
+      kyc: 'Verified',
+      avatar: 'RS',
+    ),
+    FamilyMember(
+      name: 'Priya Sharma',
+      relation: 'Spouse',
+      age: 32,
+      gender: 'Female',
+      phone: '+91 91234 56789',
+      kyc: 'Verified',
+      avatar: 'PS',
+    ),
+    FamilyMember(
+      name: 'Aryan Sharma',
+      relation: 'Son',
+      age: 8,
+      gender: 'Male',
+      phone: '—',
+      kyc: 'Pending',
+      avatar: 'AS',
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final verified = _members.where((m) => m.isKycVerified).length;
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Family Directory'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Family Directory')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddMemberSheet(context),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         icon: const Icon(Icons.person_add_outlined),
         label: const Text(
           'Add Member',
@@ -55,13 +53,13 @@ class FamilyScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          _FlatInfoHeader(),
+          _FlatInfoHeader(memberCount: _members.length, verifiedCount: verified),
           Expanded(
-            child: ListView.builder(
+            child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
               itemCount: _members.length,
-              itemBuilder: (context, index) =>
-                  _FamilyMemberCard(member: _members[index]),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (_, i) => _FamilyMemberCard(member: _members[i]),
             ),
           ),
         ],
@@ -70,7 +68,7 @@ class FamilyScreen extends StatelessWidget {
   }
 
   void _showAddMemberSheet(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -82,10 +80,18 @@ class FamilyScreen extends StatelessWidget {
 }
 
 class _FlatInfoHeader extends StatelessWidget {
+  const _FlatInfoHeader({
+    required this.memberCount,
+    required this.verifiedCount,
+  });
+
+  final int memberCount;
+  final int verifiedCount;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: AppColors.surface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
@@ -99,10 +105,10 @@ class _FlatInfoHeader extends StatelessWidget {
                 color: AppColors.primary, size: 22),
           ),
           const SizedBox(width: 12),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Flat 301, Tower A',
                 style: TextStyle(
                   fontSize: 14,
@@ -111,8 +117,8 @@ class _FlatInfoHeader extends StatelessWidget {
                 ),
               ),
               Text(
-                '3 members registered',
-                style: TextStyle(
+                '$memberCount members registered',
+                style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
                 ),
@@ -120,21 +126,9 @@ class _FlatInfoHeader extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              '2 Verified',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.success,
-              ),
-            ),
+          StatusChip(
+            label: '$verifiedCount Verified',
+            color: AppColors.success,
           ),
         ],
       ),
@@ -143,194 +137,166 @@ class _FlatInfoHeader extends StatelessWidget {
 }
 
 class _FamilyMemberCard extends StatelessWidget {
-  final Map<String, dynamic> member;
-
   const _FamilyMemberCard({required this.member});
 
-  bool get _isKycVerified => member['kyc'] == 'Verified';
-
-  Color get _avatarColor {
-    switch (member['relation'] as String) {
-      case 'Self':
-        return AppColors.primary;
-      case 'Spouse':
-        return AppColors.accent;
-      default:
-        return AppColors.warning;
-    }
-  }
+  final FamilyMember member;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return AppCard(
+      borderRadius: 18,
       child: Row(
         children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: _avatarColor.withValues(alpha: 0.15),
-                child: Text(
-                  member['avatar'] as String,
-                  style: TextStyle(
-                    color: _avatarColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              if (_isKycVerified)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: AppColors.success,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: const Icon(Icons.check,
-                        color: Colors.white, size: 10),
-                  ),
-                ),
-            ],
+          _MemberAvatar(
+            initials: member.avatar,
+            color: member.accentColor,
+            verified: member.isKycVerified,
           ),
           const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      member['name'] as String,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: _avatarColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        member['relation'] as String,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: _avatarColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.cake_outlined,
-                        size: 12, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${member['age']} yrs  •  ${member['gender']}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-                if (member['phone'] != '—') ...[
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      const Icon(Icons.phone_outlined,
-                          size: 12, color: AppColors.textSecondary),
-                      const SizedBox(width: 4),
-                      Text(
-                        member['phone'] as String,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (_isKycVerified
-                          ? AppColors.success
-                          : AppColors.warning)
-                      .withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _isKycVerified
-                          ? Icons.verified_outlined
-                          : Icons.pending_outlined,
-                      size: 12,
-                      color: _isKycVerified
-                          ? AppColors.success
-                          : AppColors.warning,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      member['kyc'] as String,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: _isKycVerified
-                            ? AppColors.success
-                            : AppColors.warning,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(8),
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.edit_outlined,
-                      size: 18, color: AppColors.textSecondary),
-                ),
-              ),
-            ],
-          ),
+          Expanded(child: _MemberDetails(member: member)),
+          _MemberTrailing(member: member),
         ],
       ),
+    );
+  }
+}
+
+class _MemberAvatar extends StatelessWidget {
+  const _MemberAvatar({
+    required this.initials,
+    required this.color,
+    required this.verified,
+  });
+
+  final String initials;
+  final Color color;
+  final bool verified;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        CircleAvatar(
+          radius: 30,
+          backgroundColor: color.withValues(alpha: 0.15),
+          child: Text(
+            initials,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        if (verified)
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                color: AppColors.success,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.surface, width: 2),
+              ),
+              child: const Icon(Icons.check, color: Colors.white, size: 10),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _MemberDetails extends StatelessWidget {
+  const _MemberDetails({required this.member});
+
+  final FamilyMember member;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Flexible(
+              child: Text(
+                member.name,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            StatusChip(label: member.relation, color: member.accentColor),
+          ],
+        ),
+        const SizedBox(height: 4),
+        _IconLine(
+          icon: Icons.cake_outlined,
+          text: '${member.age} yrs  •  ${member.gender}',
+        ),
+        if (member.hasPhone) ...[
+          const SizedBox(height: 3),
+          _IconLine(icon: Icons.phone_outlined, text: member.phone),
+        ],
+      ],
+    );
+  }
+}
+
+class _IconLine extends StatelessWidget {
+  const _IconLine({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 12, color: AppColors.textSecondary),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
+}
+
+class _MemberTrailing extends StatelessWidget {
+  const _MemberTrailing({required this.member});
+
+  final FamilyMember member;
+
+  @override
+  Widget build(BuildContext context) {
+    final verified = member.isKycVerified;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        IconChip(
+          label: member.kyc,
+          icon: verified ? Icons.verified_outlined : Icons.pending_outlined,
+          color: verified ? AppColors.success : AppColors.warning,
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(8),
+          child: const Padding(
+            padding: EdgeInsets.all(4),
+            child: Icon(Icons.edit_outlined,
+                size: 18, color: AppColors.textSecondary),
+          ),
+        ),
+      ],
     );
   }
 }

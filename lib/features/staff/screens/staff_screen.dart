@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/widgets.dart';
+import '../models/staff_member.dart';
 
 class StaffScreen extends StatelessWidget {
   const StaffScreen({super.key});
 
-  static const List<Map<String, dynamic>> _staffList = [
-    {
-      'name': 'Sunita Devi',
-      'role': 'Maid',
-      'phone': '+91 98765 43210',
-      'timings': '7:00 AM – 9:00 AM',
-      'status': 'Present',
-      'checkIn': '7:03 AM',
-      'checkOut': null,
-      'icon': Icons.cleaning_services_outlined,
-      'daysPresent': 22,
-      'totalDays': 25,
-    },
-    {
-      'name': 'Ramesh Kumar',
-      'role': 'Driver',
-      'phone': '+91 91234 56789',
-      'timings': '8:00 AM – 6:00 PM',
-      'status': 'Absent',
-      'checkIn': null,
-      'checkOut': null,
-      'icon': Icons.directions_car_outlined,
-      'daysPresent': 20,
-      'totalDays': 25,
-    },
+  static const List<StaffMember> _staffList = [
+    StaffMember(
+      name: 'Sunita Devi',
+      role: 'Maid',
+      phone: '+91 98765 43210',
+      timings: '7:00 AM – 9:00 AM',
+      status: 'Present',
+      checkIn: '7:03 AM',
+      icon: Icons.cleaning_services_outlined,
+      daysPresent: 22,
+      totalDays: 25,
+    ),
+    StaffMember(
+      name: 'Ramesh Kumar',
+      role: 'Driver',
+      phone: '+91 91234 56789',
+      timings: '8:00 AM – 6:00 PM',
+      status: 'Absent',
+      icon: Icons.directions_car_outlined,
+      daysPresent: 20,
+      totalDays: 25,
+    ),
   ];
 
   @override
@@ -37,8 +37,6 @@ class StaffScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Domestic Staff'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month_outlined),
@@ -48,8 +46,6 @@ class StaffScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddStaffSheet(context),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         icon: const Icon(Icons.person_add_outlined),
         label: const Text(
           'Add Staff',
@@ -58,13 +54,13 @@ class StaffScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          _TodaySummaryBar(staffList: _staffList),
+          const _TodaySummaryBar(staffList: _staffList),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 100),
               itemCount: _staffList.length,
-              itemBuilder: (context, index) =>
-                  _StaffCard(staff: _staffList[index]),
+              separatorBuilder: (_, _) => const SizedBox(height: 14),
+              itemBuilder: (_, i) => _StaffCard(staff: _staffList[i]),
             ),
           ),
         ],
@@ -73,7 +69,7 @@ class StaffScreen extends StatelessWidget {
   }
 
   void _showAddStaffSheet(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -85,26 +81,24 @@ class StaffScreen extends StatelessWidget {
 }
 
 class _TodaySummaryBar extends StatelessWidget {
-  final List<Map<String, dynamic>> staffList;
-
   const _TodaySummaryBar({required this.staffList});
+
+  final List<StaffMember> staffList;
 
   @override
   Widget build(BuildContext context) {
-    final present =
-        staffList.where((s) => s['status'] == 'Present').length;
+    final present = staffList.where((s) => s.isPresent).length;
     final absent = staffList.length - present;
 
     return Container(
-      color: Colors.white,
+      color: AppColors.surface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          const Icon(Icons.today_outlined,
-              size: 16, color: AppColors.primary),
+          const Icon(Icons.today_outlined, size: 16, color: AppColors.primary),
           const SizedBox(width: 6),
           const Text(
-            'Today\'s Attendance',
+            "Today's Attendance",
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -112,109 +106,41 @@ class _TodaySummaryBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          _AttendancePill(
-              label: '$present Present', color: AppColors.success),
+          StatusChip(label: '$present Present', color: AppColors.success),
           const SizedBox(width: 8),
-          _AttendancePill(label: '$absent Absent', color: AppColors.error),
+          StatusChip(label: '$absent Absent', color: AppColors.error),
         ],
-      ),
-    );
-  }
-}
-
-class _AttendancePill extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _AttendancePill({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
       ),
     );
   }
 }
 
 class _StaffCard extends StatelessWidget {
-  final Map<String, dynamic> staff;
-
   const _StaffCard({required this.staff});
 
-  bool get _isPresent => staff['status'] == 'Present';
+  final StaffMember staff;
 
   @override
   Widget build(BuildContext context) {
-    final daysPresent = staff['daysPresent'] as int;
-    final totalDays = staff['totalDays'] as int;
-    final attendancePct = daysPresent / totalDays;
+    final fraction = staff.attendanceFraction;
+    final goodAttendance = fraction >= 0.8;
+    final progressColor = goodAttendance ? AppColors.success : AppColors.warning;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return AppCard(
+      borderRadius: 18,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    child: Icon(
-                      staff['icon'] as IconData,
-                      color: AppColors.primary,
-                      size: 26,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: _isPresent
-                            ? AppColors.success
-                            : AppColors.error,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              _StaffAvatar(icon: staff.icon, isPresent: staff.isPresent),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      staff['name'] as String,
+                      staff.name,
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -223,7 +149,7 @@ class _StaffCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      staff['role'] as String,
+                      staff.role,
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
@@ -232,24 +158,7 @@ class _StaffCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: (_isPresent ? AppColors.success : AppColors.error)
-                      .withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  staff['status'] as String,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color:
-                        _isPresent ? AppColors.success : AppColors.error,
-                  ),
-                ),
-              ),
+              StatusChip.forStatus(staff.status),
             ],
           ),
           const SizedBox(height: 14),
@@ -258,17 +167,14 @@ class _StaffCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _DetailChip(
-                  icon: Icons.schedule,
-                  value: staff['timings'] as String,
-                ),
+                child: _DetailChip(icon: Icons.schedule, value: staff.timings),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _DetailChip(
                   icon: Icons.login,
-                  value: _isPresent
-                      ? 'In at ${staff['checkIn']}'
+                  value: staff.isPresent
+                      ? 'In at ${staff.checkIn}'
                       : 'Not checked in',
                 ),
               ),
@@ -279,20 +185,18 @@ class _StaffCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'This month: $daysPresent/$totalDays days',
+                'This month: ${staff.daysPresent}/${staff.totalDays} days',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
                 ),
               ),
               Text(
-                '${(attendancePct * 100).toStringAsFixed(0)}%',
+                '${(fraction * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: attendancePct >= 0.8
-                      ? AppColors.success
-                      : AppColors.warning,
+                  color: progressColor,
                 ),
               ),
             ],
@@ -301,48 +205,28 @@ class _StaffCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: attendancePct,
+              value: fraction,
               backgroundColor: AppColors.divider,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                attendancePct >= 0.8
-                    ? AppColors.success
-                    : AppColors.warning,
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               minHeight: 6,
             ),
           ),
           const SizedBox(height: 12),
-          Row(
+          const Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.phone_outlined, size: 16),
-                  label: const Text('Call'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                child: _StaffActionButton(
+                  icon: Icons.phone_outlined,
+                  label: 'Call',
+                  color: AppColors.primary,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.calendar_today_outlined, size: 16),
-                  label: const Text('Attendance'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: const BorderSide(color: AppColors.accent),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                child: _StaffActionButton(
+                  icon: Icons.calendar_today_outlined,
+                  label: 'Attendance',
+                  color: AppColors.accent,
                 ),
               ),
             ],
@@ -353,11 +237,44 @@ class _StaffCard extends StatelessWidget {
   }
 }
 
+class _StaffAvatar extends StatelessWidget {
+  const _StaffAvatar({required this.icon, required this.isPresent});
+
+  final IconData icon;
+  final bool isPresent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        CircleAvatar(
+          radius: 28,
+          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+          child: Icon(icon, color: AppColors.primary, size: 26),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: isPresent ? AppColors.success : AppColors.error,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.surface, width: 2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _DetailChip extends StatelessWidget {
+  const _DetailChip({required this.icon, required this.value});
+
   final IconData icon;
   final String value;
-
-  const _DetailChip({required this.icon, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -374,14 +291,41 @@ class _DetailChip extends StatelessWidget {
           Flexible(
             child: Text(
               value,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 11,
                 color: AppColors.textSecondary,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StaffActionButton extends StatelessWidget {
+  const _StaffActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () {},
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: color,
+        side: BorderSide(color: color),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

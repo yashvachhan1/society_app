@@ -14,5 +14,11 @@ void main() {
     // Splash screen shows the app name.
     expect(find.text('Society App'), findsOneWidget);
     expect(find.byIcon(Icons.apartment), findsOneWidget);
+
+    // Let the splash auto-navigation timer fire so no timers remain pending,
+    // then settle on the login screen.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome Back!'), findsOneWidget);
   });
 }

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
-import '../../../core/theme/app_theme.dart';
+
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_theme.dart';
 
 class OtpScreen extends StatefulWidget {
-  final String phone;
   const OtpScreen({super.key, required this.phone});
+  final String phone;
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -38,7 +39,7 @@ class _OtpScreenState extends State<OtpScreen> {
     });
   }
 
-  void _verifyOtp() async {
+  Future<void> _verifyOtp() async {
     if (_otpController.text.length != 6) return;
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(seconds: 1));

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'core/theme/app_theme.dart';
+
 import 'core/constants/app_constants.dart';
-import 'features/auth/screens/splash_screen.dart';
+import 'core/theme/app_theme.dart';
+import 'features/alerts/screens/alerts_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/otp_screen.dart';
-import 'features/home/screens/home_screen.dart';
+import 'features/auth/screens/splash_screen.dart';
 import 'features/billing/screens/billing_screen.dart';
-import 'features/notices/screens/notices_screen.dart';
 import 'features/complaints/screens/complaints_screen.dart';
-import 'features/guests/screens/guests_screen.dart';
-import 'features/staff/screens/staff_screen.dart';
-import 'features/alerts/screens/alerts_screen.dart';
 import 'features/family/screens/family_screen.dart';
-import 'features/vehicles/screens/vehicles_screen.dart';
+import 'features/guests/screens/guests_screen.dart';
+import 'features/home/screens/home_screen.dart';
+import 'features/notices/screens/notices_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'features/staff/screens/staff_screen.dart';
+import 'features/vehicles/screens/vehicles_screen.dart';
 
 final _router = GoRouter(
   initialLocation: AppRoutes.splash,
