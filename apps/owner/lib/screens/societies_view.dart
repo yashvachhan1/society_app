@@ -12,13 +12,13 @@ class SocietiesView extends StatelessWidget {
   Widget build(BuildContext context) {
     return DashboardPage(
       builder: (context, width) => SectionCard(
-        title: 'All Societies',
+        title: 'All Properties',
         action: const _AddButton(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Showing ${DemoData.societies.length} of 487 societies',
+              'Showing ${DemoData.societies.length} of 487 properties',
               style: const TextStyle(
                 fontSize: 12.5,
                 color: AppColors.textSecondary,
@@ -47,7 +47,7 @@ class _AddButton extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: () {},
       icon: const Icon(Icons.add_rounded, size: 18),
-      label: const Text('Add Society'),
+      label: const Text('Add Property'),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),

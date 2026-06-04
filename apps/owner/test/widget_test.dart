@@ -22,21 +22,44 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.textContaining('Welcome back'), findsOneWidget);
-    expect(find.text('Total Societies'), findsOneWidget);
+    expect(find.text('Total Properties'), findsOneWidget);
     expect(find.text('Monthly Revenue'), findsOneWidget);
   });
 
-  testWidgets('societies tab lists all societies', (tester) async {
+  testWidgets('properties tab lists all properties', (tester) async {
     useDesktopSurface(tester);
 
     await tester.pumpWidget(const OwnerApp());
     await tester.pump();
 
-    await tester.tap(find.text('Societies'));
+    await tester.tap(find.text('Properties'));
     await tester.pumpAndSettle();
 
-    expect(find.text('All Societies'), findsOneWidget);
+    expect(find.text('All Properties'), findsOneWidget);
     expect(find.text('Sunrise Residency'), findsWidgets);
+  });
+
+  testWidgets('onboarding offers property types and modular services', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+
+    await tester.pumpWidget(const OwnerApp());
+    await tester.pump();
+
+    await tester.tap(find.text('Onboarding'));
+    await tester.pumpAndSettle();
+
+    // Multiple property types — not just societies.
+    expect(find.text('Onboard a new property'), findsOneWidget);
+    expect(find.text('Residential Society'), findsWidgets);
+    expect(find.text('Corporate Park'), findsWidgets);
+
+    // 8 of 11 services on by default; toggling one updates the live count.
+    expect(find.text('8 of 11 enabled'), findsOneWidget);
+    await tester.tap(find.byType(Switch).first);
+    await tester.pumpAndSettle();
+    expect(find.text('8 of 11 enabled'), findsNothing);
   });
 
   testWidgets('narrow layout opens the sidebar from a hamburger', (

@@ -52,7 +52,7 @@ class SocietyRow extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                '${society.city}  •  ${society.flats} flats  •  ${society.residents} residents',
+                '${society.type}  •  ${society.city}  •  ${society.flats} units',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

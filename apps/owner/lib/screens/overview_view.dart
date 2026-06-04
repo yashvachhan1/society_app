@@ -47,7 +47,7 @@ class _Greeting extends StatelessWidget {
         ),
         SizedBox(height: 4),
         Text(
-          'Here is how ${DemoData.platformName} is performing across all societies.',
+          'Here is how ${DemoData.platformName} is performing across all your properties.',
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
       ],

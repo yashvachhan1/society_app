@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:society_core/society_core.dart';
 
 import '../data/demo_data.dart';
+import 'onboarding_view.dart';
 import 'overview_view.dart';
 import 'societies_view.dart';
 
@@ -27,6 +28,8 @@ class OwnerShell extends StatelessWidget {
             return const OverviewView();
           case 1:
             return const SocietiesView();
+          case 3:
+            return const OnboardingView();
           default:
             return ComingSoon(
               label: DemoData.navItems[i].label,
