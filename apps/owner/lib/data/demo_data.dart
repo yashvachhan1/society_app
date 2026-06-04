@@ -260,41 +260,6 @@ class DemoData {
     ),
   ];
 
-  static const supportStats = <PlatformStat>[
-    PlatformStat(
-      label: 'Open Tickets',
-      value: '23',
-      icon: Icons.mark_email_unread_rounded,
-      color: AppColors.warning,
-      trend: '+4 today',
-      trendUp: false,
-    ),
-    PlatformStat(
-      label: 'In Progress',
-      value: '8',
-      icon: Icons.timelapse_rounded,
-      color: AppColors.primary,
-      trend: '3 high',
-      trendUp: true,
-    ),
-    PlatformStat(
-      label: 'Resolved (7d)',
-      value: '142',
-      icon: Icons.check_circle_rounded,
-      color: AppColors.success,
-      trend: '+18%',
-      trendUp: true,
-    ),
-    PlatformStat(
-      label: 'Avg First Response',
-      value: '2.4h',
-      icon: Icons.bolt_rounded,
-      color: AppColors.accent,
-      trend: '-12%',
-      trendUp: true,
-    ),
-  ];
-
   static const supportTickets = <SupportTicket>[
     SupportTicket(
       id: 'TKT-1042',

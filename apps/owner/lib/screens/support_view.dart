@@ -33,20 +33,6 @@ class _SupportViewState extends State<SupportView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const _Intro(),
-          const SizedBox(height: 24),
-          StatTileGrid(
-            tiles: [
-              for (final s in DemoData.supportStats)
-                StatTile(
-                  label: s.label,
-                  value: s.value,
-                  icon: s.icon,
-                  color: s.color,
-                  trend: s.trend,
-                  trendUp: s.trendUp,
-                ),
-            ],
-          ),
           const SizedBox(height: 22),
           SectionCard(
             title: 'Tickets',
