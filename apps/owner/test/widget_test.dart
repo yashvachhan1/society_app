@@ -50,10 +50,16 @@ void main() {
     await tester.tap(find.text('Onboarding'));
     await tester.pumpAndSettle();
 
-    // Multiple property types — not just societies.
+    // Step 1 (Details): multiple property types — not just societies.
     expect(find.text('Onboard a new property'), findsOneWidget);
     expect(find.text('Residential Society'), findsWidgets);
     expect(find.text('Corporate Park'), findsWidgets);
+
+    // Walk to the Services step (Details -> Structure -> Admin -> Services).
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+    }
 
     // 8 of 11 services on by default; toggling one updates the live count.
     expect(find.text('8 of 11 enabled'), findsOneWidget);
