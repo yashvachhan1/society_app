@@ -21,18 +21,25 @@ class DemoData {
       name: 'Basic',
       monthly: 999,
       tagline: 'Essentials for small societies',
+      includedCount: 3,
     ),
     SubscriptionPlan(
       name: 'Pro',
       monthly: 2499,
       tagline: 'Most popular — the full toolkit',
+      includedCount: 8,
     ),
     SubscriptionPlan(
       name: 'Enterprise',
       monthly: 4999,
-      tagline: 'For large & multi-tower estates',
+      tagline: 'Everything, for large estates',
+      includedCount: 11,
     ),
   ];
+
+  /// Custom-plan pricing: a base fee plus a per-service charge (₹ / month).
+  static const customBase = 299;
+  static const customPerService = 180;
 
   static const navItems = <DashNavItem>[
     DashNavItem(icon: Icons.space_dashboard_rounded, label: 'Overview'),

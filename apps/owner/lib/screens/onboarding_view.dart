@@ -18,8 +18,7 @@ class _OnboardingViewState extends State<OnboardingView> {
     'Details',
     'Structure',
     'Admin',
-    'Services',
-    'Subscription',
+    'Plan',
     'Review',
   ];
 
@@ -45,10 +44,23 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   int _planIndex = 1; // Pro — most popular
   bool _annual = false;
+  bool _custom = false; // false = plan-based (fixed features), true = custom
 
   int get _totalUnits => _towers * _floors * _unitsPerFloor;
   int get _enabledCount => _enabled.values.where((on) => on).length;
   bool get _isLast => _step == _steps.length - 1;
+
+  /// Services that will be active: a plan's fixed set, or the custom picks.
+  int get _serviceCount =>
+      _custom ? _enabledCount : DemoData.plansCatalog[_planIndex].includedCount;
+
+  /// Monthly price: the plan's price, or base + per-service for a custom plan.
+  int get _monthlyPrice => _custom
+      ? DemoData.customBase + DemoData.customPerService * _enabledCount
+      : DemoData.plansCatalog[_planIndex].monthly;
+
+  String get _planLabel =>
+      _custom ? 'Custom plan' : '${DemoData.plansCatalog[_planIndex].name} plan';
 
   @override
   void dispose() {
@@ -84,7 +96,7 @@ class _OnboardingViewState extends State<OnboardingView> {
           const SizedBox(height: 22),
           SectionCard(
             title: '${_step + 1}.  ${_steps[_step]}',
-            action: _step == 3
+            action: (_step == 3 && _custom)
                 ? _EnabledChip(
                     count: _enabledCount,
                     total: DemoData.serviceModules.length,
@@ -112,12 +124,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       case 2:
         return _adminStep();
       case 3:
-        return _ModuleGrid(
-          enabled: _enabled,
-          onToggle: (name, on) => setState(() => _enabled[name] = on),
-        );
-      case 4:
-        return _subscriptionStep();
+        return _planStep();
       default:
         return _reviewStep();
     }
@@ -226,15 +233,31 @@ class _OnboardingViewState extends State<OnboardingView> {
     );
   }
 
-  Widget _subscriptionStep() {
+  Widget _planStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _PlanGrid(
-          selected: _planIndex,
-          onSelect: (i) => setState(() => _planIndex = i),
+        _ModeToggle(
+          custom: _custom,
+          onChanged: (v) => setState(() => _custom = v),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
+        if (_custom) ...[
+          const Text(
+            'Pick exactly the services this property needs — pay only for these.',
+            style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 14),
+          _ModuleGrid(
+            enabled: _enabled,
+            onToggle: (name, on) => setState(() => _enabled[name] = on),
+          ),
+        ] else
+          _PlanGrid(
+            selected: _planIndex,
+            onSelect: (i) => setState(() => _planIndex = i),
+          ),
+        const SizedBox(height: 22),
         const _FieldLabel('Billing cycle'),
         const SizedBox(height: 10),
         _CycleToggle(
@@ -242,14 +265,13 @@ class _OnboardingViewState extends State<OnboardingView> {
           onChanged: (v) => setState(() => _annual = v),
         ),
         const SizedBox(height: 20),
-        _PriceBanner(plan: DemoData.plansCatalog[_planIndex], annual: _annual),
+        _PriceBanner(label: _planLabel, monthly: _monthlyPrice, annual: _annual),
       ],
     );
   }
 
   Widget _reviewStep() {
     final type = DemoData.propertyTypes[_typeIndex];
-    final plan = DemoData.plansCatalog[_planIndex];
     const dash = '—';
     return Column(
       children: [
@@ -285,13 +307,14 @@ class _OnboardingViewState extends State<OnboardingView> {
         _SummaryRow(
           icon: Icons.tune_rounded,
           label: 'Services',
-          value: '$_enabledCount of ${DemoData.serviceModules.length} enabled',
+          value: '$_serviceCount services  ${_custom ? '(custom)' : '(in plan)'}',
         ),
         const Divider(height: 22, color: AppColors.divider),
         _SummaryRow(
           icon: Icons.workspace_premium_rounded,
           label: 'Plan',
-          value: '${plan.name}  ·  ${_annual ? 'Annual' : 'Monthly'}',
+          value:
+              '$_planLabel  ·  ${_annual ? 'Annual' : 'Monthly'}  ·  ₹$_monthlyPrice/mo',
         ),
       ],
     );
@@ -737,9 +760,70 @@ class _PlanCard extends StatelessWidget {
                 height: 1.3,
               ),
             ),
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColors.divider),
+            const SizedBox(height: 10),
+            for (final m
+                in DemoData.serviceModules.take(plan.includedCount).take(4))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_rounded,
+                      size: 15,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        m.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (plan.includedCount > 4)
+              Text(
+                '+${plan.includedCount - 4} more services',
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ModeToggle extends StatelessWidget {
+  const _ModeToggle({required this.custom, required this.onChanged});
+
+  final bool custom;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _Chip(
+          label: 'Plan-based',
+          selected: !custom,
+          onTap: () => onChanged(false),
+        ),
+        _Chip(label: 'Custom', selected: custom, onTap: () => onChanged(true)),
+      ],
     );
   }
 }
@@ -772,14 +856,19 @@ class _CycleToggle extends StatelessWidget {
 }
 
 class _PriceBanner extends StatelessWidget {
-  const _PriceBanner({required this.plan, required this.annual});
+  const _PriceBanner({
+    required this.label,
+    required this.monthly,
+    required this.annual,
+  });
 
-  final SubscriptionPlan plan;
+  final String label;
+  final int monthly;
   final bool annual;
 
   @override
   Widget build(BuildContext context) {
-    final perMonth = annual ? (plan.monthly * 0.8).round() : plan.monthly;
+    final perMonth = annual ? (monthly * 0.8).round() : monthly;
     final cycleText = annual
         ? 'billed ₹${perMonth * 12} / year'
         : 'billed monthly';
@@ -803,7 +892,7 @@ class _PriceBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${plan.name} plan  ·  $cycleText',
+                  '$label  ·  $cycleText',
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,

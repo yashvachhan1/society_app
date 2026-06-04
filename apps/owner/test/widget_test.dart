@@ -55,11 +55,16 @@ void main() {
     expect(find.text('Residential Society'), findsWidgets);
     expect(find.text('Corporate Park'), findsWidgets);
 
-    // Walk to the Services step (Details -> Structure -> Admin -> Services).
+    // Walk to the Plan step (Details -> Structure -> Admin -> Plan).
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
     }
+
+    // Plan-based by default — switch to a Custom plan to pick services.
+    expect(find.text('Plan-based'), findsWidgets);
+    await tester.tap(find.text('Custom'));
+    await tester.pumpAndSettle();
 
     // 8 of 11 services on by default; toggling one updates the live count.
     expect(find.text('8 of 11 enabled'), findsOneWidget);
@@ -115,8 +120,8 @@ void main() {
     await tester.tap(find.text('Onboarding'));
     await tester.pumpAndSettle();
 
-    // Next through all five steps to reach Review.
-    for (var i = 0; i < 5; i++) {
+    // Next through to Review (Details -> Structure -> Admin -> Plan -> Review).
+    for (var i = 0; i < 4; i++) {
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
     }
