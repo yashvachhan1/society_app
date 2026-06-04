@@ -9,9 +9,6 @@ class AppRoutes {
   static const login = '/login';
   static const otp = '/otp';
 
-  // Admin panel (Phase 2 — web dashboard)
-  static const admin = '/admin';
-
   // Bottom navigation tabs
   static const home = '/home';
   static const billing = '/billing';

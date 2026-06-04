@@ -10,7 +10,7 @@
     {
       "name": "admin-static",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5051", "--directory", "apps/admin/build/web"],
+      "runtimeArgs": ["-m", "http.server", "5051", "--bind", "0.0.0.0", "--directory", "apps/admin/build/web"],
       "port": 5051
     }
   ]
