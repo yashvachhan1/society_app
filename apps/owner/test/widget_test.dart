@@ -83,4 +83,19 @@ void main() {
 
     expect(scaffold.isDrawerOpen, isTrue);
   });
+
+  testWidgets('Add Property jumps to the onboarding flow', (tester) async {
+    useDesktopSurface(tester);
+
+    await tester.pumpWidget(const OwnerApp());
+    await tester.pump();
+
+    await tester.tap(find.text('Properties'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Property'));
+    await tester.pumpAndSettle();
+
+    // Both entry points lead to the one onboarding flow.
+    expect(find.text('Onboard a new property'), findsOneWidget);
+  });
 }

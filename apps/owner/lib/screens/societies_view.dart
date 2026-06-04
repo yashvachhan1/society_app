@@ -45,7 +45,9 @@ class _AddButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () => DashboardScope.of(context).go(
+        DemoData.navItems.indexWhere((n) => n.label == 'Onboarding'),
+      ),
       icon: const Icon(Icons.add_rounded, size: 18),
       label: const Text('Add Property'),
       style: ElevatedButton.styleFrom(

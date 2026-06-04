@@ -3,6 +3,31 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_models.dart';
 
+/// Lets any page inside a [DashboardShell] switch the selected sidebar tab —
+/// e.g. an "Add Property" button that jumps to the onboarding tab. Access it
+/// with `DashboardScope.of(context).go(index)`.
+class DashboardScope extends InheritedWidget {
+  const DashboardScope({
+    super.key,
+    required this.currentIndex,
+    required this.go,
+    required super.child,
+  });
+
+  final int currentIndex;
+  final void Function(int index) go;
+
+  static DashboardScope of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<DashboardScope>();
+    assert(scope != null, 'DashboardScope.of() used outside a DashboardShell');
+    return scope!;
+  }
+
+  @override
+  bool updateShouldNotify(DashboardScope oldWidget) =>
+      currentIndex != oldWidget.currentIndex;
+}
+
 /// A responsive web-dashboard scaffold shared by the admin and owner panels.
 ///
 /// Wide screens get a permanent left sidebar; narrow screens (phones/tablets)
@@ -69,34 +94,38 @@ class _DashboardShellState extends State<DashboardShell> {
           userRole: widget.userRole,
         );
 
-        return Scaffold(
-          key: _scaffoldKey,
-          backgroundColor: AppColors.background,
-          drawer: isWide
-              ? null
-              : Drawer(
-                  width: 270,
-                  backgroundColor: AppColors.surface,
-                  child: sidebar,
-                ),
-          body: SafeArea(
-            child: Row(
-              children: [
-                if (isWide) sidebar,
-                Expanded(
-                  child: Column(
-                    children: [
-                      _TopBar(
-                        title: title,
-                        onMenu: isWide
-                            ? null
-                            : () => _scaffoldKey.currentState?.openDrawer(),
-                      ),
-                      Expanded(child: widget.pageBuilder(context, _index)),
-                    ],
+        return DashboardScope(
+          currentIndex: _index,
+          go: onSelect,
+          child: Scaffold(
+            key: _scaffoldKey,
+            backgroundColor: AppColors.background,
+            drawer: isWide
+                ? null
+                : Drawer(
+                    width: 270,
+                    backgroundColor: AppColors.surface,
+                    child: sidebar,
                   ),
-                ),
-              ],
+            body: SafeArea(
+              child: Row(
+                children: [
+                  if (isWide) sidebar,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _TopBar(
+                          title: title,
+                          onMenu: isWide
+                              ? null
+                              : () => _scaffoldKey.currentState?.openDrawer(),
+                        ),
+                        Expanded(child: widget.pageBuilder(context, _index)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -153,11 +182,7 @@ class _Sidebar extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: AppColors.divider),
-          _UserTile(
-            initials: userInitials,
-            name: userName,
-            role: userRole,
-          ),
+          _UserTile(initials: userInitials, name: userName, role: userRole),
         ],
       ),
     );
@@ -165,7 +190,11 @@ class _Sidebar extends StatelessWidget {
 }
 
 class _Brand extends StatelessWidget {
-  const _Brand({required this.title, required this.subtitle, required this.logo});
+  const _Brand({
+    required this.title,
+    required this.subtitle,
+    required this.logo,
+  });
 
   final String title;
   final String subtitle;
@@ -278,7 +307,9 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(
-        color: selected ? Colors.white.withValues(alpha: 0.25) : AppColors.error,
+        color: selected
+            ? Colors.white.withValues(alpha: 0.25)
+            : AppColors.error,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
@@ -383,7 +414,10 @@ class _TopBar extends StatelessWidget {
             IconButton(
               onPressed: onMenu,
               tooltip: 'Menu',
-              icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
+              icon: const Icon(
+                Icons.menu_rounded,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(width: 4),
           ],
