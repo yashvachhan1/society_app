@@ -7,4 +7,5 @@ export 'empty_state.dart';
 export 'icon_chip.dart';
 export 'info_banner.dart';
 export 'section_header.dart';
+export 'skyline_logo.dart';
 export 'status_chip.dart';

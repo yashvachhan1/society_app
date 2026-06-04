@@ -8,13 +8,11 @@
   <meta name="description" content="Society Management App - Smart living for owners & tenants">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Society App">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
   <title>Society App</title>
@@ -36,87 +34,127 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #1E88E5 100%);
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,0.14), transparent 55%),
+        linear-gradient(160deg, #0D47A1 0%, #1565C0 55%, #1E88E5 100%);
       transition: opacity 0.5s ease, visibility 0.5s ease;
     }
+    #loading.hidden { opacity: 0; visibility: hidden; }
 
-    #loading.hidden {
-      opacity: 0;
-      visibility: hidden;
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .logo-box {
-      width: 96px;
-      height: 96px;
+    .logo-card {
+      width: 104px;
+      height: 104px;
       background: #ffffff;
-      border-radius: 24px;
+      border-radius: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-      animation: pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
-    .logo-box svg { width: 56px; height: 56px; fill: #1565C0; }
+    .logo-card svg { width: 60px; height: 60px; display: block; }
+
+    /* Sequential "lights on" for the windows */
+    .logo-card svg .win {
+      opacity: 0;
+      animation: lightUp 0.4s ease forwards;
+    }
 
     .app-title {
-      margin-top: 24px;
+      margin-top: 26px;
       color: #ffffff;
-      font-size: 26px;
+      font-size: 27px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       opacity: 0;
-      animation: fadeUp 0.6s ease 0.3s forwards;
+      animation: fadeUp 0.6s ease 0.35s forwards;
     }
 
     .app-subtitle {
-      margin-top: 6px;
-      color: rgba(255, 255, 255, 0.75);
-      font-size: 14px;
+      margin-top: 7px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13.5px;
+      font-weight: 400;
+      letter-spacing: 0.6px;
       opacity: 0;
       animation: fadeUp 0.6s ease 0.5s forwards;
     }
 
-    .spinner {
-      margin-top: 40px;
-      width: 36px;
-      height: 36px;
-      border: 3px solid rgba(255, 255, 255, 0.25);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      opacity: 0;
-      animation: spin 0.8s linear infinite, fadeUp 0.6s ease 0.7s forwards;
+    @keyframes rise {
+      0% { transform: translateY(16px) scale(0.85); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
-
-    @keyframes pop {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
     @keyframes fadeUp {
-      0% { transform: translateY(12px); opacity: 0; }
+      0% { transform: translateY(10px); opacity: 0; }
       100% { transform: translateY(0); opacity: 1; }
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes lightUp {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <!-- Branded loading screen (shown until Flutter is ready) -->
   <div id="loading">
-    <div class="logo-box">
-      <svg viewBox="0 0 24 24"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg>
+    <div class="brand">
+      <div class="logo-card">
+        <!-- Society skyline: three buildings with windows that light up -->
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="20" width="12" height="22" rx="1.5" fill="#1E88E5"/>
+          <rect x="18.5" y="9" width="13" height="33" rx="1.5" fill="#1565C0"/>
+          <rect x="32" y="24" width="10" height="18" rx="1.5" fill="#42A5F5"/>
+          <g fill="#ffffff">
+            <rect class="win" style="animation-delay:.30s" x="9"    y="24" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.46s" x="12.8" y="24" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.38s" x="9"    y="29" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.54s" x="12.8" y="29" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.42s" x="9"    y="34" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.58s" x="12.8" y="34" width="2.6" height="2.6" rx="0.5"/>
+
+            <rect class="win" style="animation-delay:.34s" x="21"   y="13" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.50s" x="26.6" y="13" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.40s" x="21"   y="18" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.56s" x="26.6" y="18" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.46s" x="21"   y="23" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.62s" x="26.6" y="23" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.52s" x="21"   y="28" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.68s" x="26.6" y="28" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.58s" x="21"   y="33" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.74s" x="26.6" y="33" width="2.6" height="2.6" rx="0.5"/>
+
+            <rect class="win" style="animation-delay:.44s" x="34.4" y="28" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.60s" x="37.8" y="28" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.50s" x="34.4" y="33" width="2.6" height="2.6" rx="0.5"/>
+            <rect class="win" style="animation-delay:.66s" x="37.8" y="33" width="2.6" height="2.6" rx="0.5"/>
+          </g>
+        </svg>
+      </div>
+      <div class="app-title">Society App</div>
+      <div class="app-subtitle">Smart Society Management</div>
     </div>
-    <div class="app-title">Society App</div>
-    <div class="app-subtitle">Smart Society Management</div>
-    <div class="spinner"></div>
   </div>
 
   <script>
-    // Remove loading screen once Flutter has painted its first frame
+    // Preview mode: clear any stale service-worker cache so each visit loads
+    // the latest build instead of an old cached version.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { r.unregister(); });
+      });
+    }
+    if (window.caches && caches.keys) {
+      caches.keys().then(function (keys) {
+        keys.forEach(function (k) { caches.delete(k); });
+      });
+    }
+
     window.addEventListener('flutter-first-frame', function () {
       var loader = document.getElementById('loading');
       if (loader) {

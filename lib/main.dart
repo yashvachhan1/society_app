@@ -14,6 +14,8 @@ import 'features/guests/screens/guests_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/notices/screens/notices_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'features/services/screens/services_screen.dart';
+import 'features/shell/main_shell.dart';
 import 'features/staff/screens/staff_screen.dart';
 import 'features/vehicles/screens/vehicles_screen.dart';
 
@@ -26,16 +28,44 @@ final _router = GoRouter(
       path: AppRoutes.otp,
       builder: (_, state) => OtpScreen(phone: state.extra as String? ?? ''),
     ),
-    GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
-    GoRoute(path: AppRoutes.billing, builder: (_, _) => const BillingScreen()),
-    GoRoute(path: AppRoutes.notices, builder: (_, _) => const NoticesScreen()),
-    GoRoute(path: AppRoutes.complaints, builder: (_, _) => const ComplaintsScreen()),
-    GoRoute(path: AppRoutes.guests, builder: (_, _) => const GuestsScreen()),
-    GoRoute(path: AppRoutes.staff, builder: (_, _) => const StaffScreen()),
-    GoRoute(path: AppRoutes.alerts, builder: (_, _) => const AlertsScreen()),
-    GoRoute(path: AppRoutes.family, builder: (_, _) => const FamilyScreen()),
-    GoRoute(path: AppRoutes.vehicles, builder: (_, _) => const VehiclesScreen()),
-    GoRoute(path: AppRoutes.profile, builder: (_, _) => const ProfileScreen()),
+    StatefulShellRoute.indexedStack(
+      builder: (_, _, navigationShell) =>
+          MainShell(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (_, _) => const HomeScreen(),
+              routes: [
+                GoRoute(path: 'services', builder: (_, _) => const ServicesScreen()),
+                GoRoute(path: 'complaints', builder: (_, _) => const ComplaintsScreen()),
+                GoRoute(path: 'guests', builder: (_, _) => const GuestsScreen()),
+                GoRoute(path: 'staff', builder: (_, _) => const StaffScreen()),
+                GoRoute(path: 'alerts', builder: (_, _) => const AlertsScreen()),
+                GoRoute(path: 'family', builder: (_, _) => const FamilyScreen()),
+                GoRoute(path: 'vehicles', builder: (_, _) => const VehiclesScreen()),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: AppRoutes.billing, builder: (_, _) => const BillingScreen()),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: AppRoutes.notices, builder: (_, _) => const NoticesScreen()),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: AppRoutes.profile, builder: (_, _) => const ProfileScreen()),
+          ],
+        ),
+      ],
+    ),
   ],
 );
 

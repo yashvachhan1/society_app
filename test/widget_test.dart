@@ -1,24 +1,22 @@
 // Basic smoke test for the Society App.
 //
-// Verifies the app boots and shows the splash screen branding.
+// Verifies the app boots into the splash and flows to the login screen.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:society_app/main.dart';
 
 void main() {
-  testWidgets('App boots and shows splash branding', (WidgetTester tester) async {
+  testWidgets('App boots, shows splash, then login', (WidgetTester tester) async {
     await tester.pumpWidget(const SocietyApp());
 
-    // Splash screen shows the app name.
+    // Splash screen shows the app branding.
     expect(find.text('Society App'), findsOneWidget);
-    expect(find.byIcon(Icons.apartment), findsOneWidget);
+    expect(find.text('Smart Society Management'), findsOneWidget);
 
-    // Let the splash auto-navigation timer fire so no timers remain pending,
-    // then settle on the login screen.
-    await tester.pump(const Duration(seconds: 3));
+    // Let the splash auto-navigation timer fire, then settle on login.
+    await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
-    expect(find.text('Welcome Back!'), findsOneWidget);
+    expect(find.text('Welcome Back 👋'), findsOneWidget);
   });
 }

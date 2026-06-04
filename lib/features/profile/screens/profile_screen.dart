@@ -86,13 +86,7 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      decoration: const BoxDecoration(color: AppColors.primary),
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
       child: Column(
         children: [

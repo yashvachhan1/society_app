@@ -4,18 +4,26 @@ class AppConstants {
 }
 
 class AppRoutes {
+  // Top-level (outside the bottom-nav shell)
   static const splash = '/';
   static const login = '/login';
   static const otp = '/otp';
-  static const register = '/register';
+
+  // Admin panel (Phase 2 — web dashboard)
+  static const admin = '/admin';
+
+  // Bottom navigation tabs
   static const home = '/home';
   static const billing = '/billing';
   static const notices = '/notices';
-  static const complaints = '/complaints';
-  static const guests = '/guests';
-  static const staff = '/staff';
-  static const alerts = '/alerts';
-  static const family = '/family';
-  static const vehicles = '/vehicles';
   static const profile = '/profile';
+
+  // Secondary screens (pushed within the Home tab, bottom nav stays visible)
+  static const services = '/home/services';
+  static const complaints = '/home/complaints';
+  static const guests = '/home/guests';
+  static const staff = '/home/staff';
+  static const alerts = '/home/alerts';
+  static const family = '/home/family';
+  static const vehicles = '/home/vehicles';
 }

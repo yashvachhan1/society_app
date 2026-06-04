@@ -40,17 +40,13 @@ dependencies:
   flutter_bloc: ^9.1.0
   equatable: ^2.0.7
 
-  # UI
+  # UI (pure-Dart, no native build deps)
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.15
-  cached_network_image: ^3.4.1
   shimmer: ^3.0.0
   fl_chart: ^0.70.2
   pinput: ^5.0.0
-
-  # Storage & Preferences
-  shared_preferences: ^2.3.4
-  flutter_secure_storage: ^9.2.4
+  qr_flutter: ^4.1.0
 
   # HTTP & API
   dio: ^5.8.0+1
@@ -58,13 +54,11 @@ dependencies:
 
   # Utils
   intl: ^0.20.2
-  image_picker: ^1.1.2
-  file_picker: ^8.1.7
-  permission_handler: ^11.4.0
-  url_launcher: ^6.3.1
-  share_plus: ^10.1.4
-  qr_flutter: ^4.1.0
-  mobile_scanner: ^6.0.5
+
+  # NOTE: Native plugins (image_picker, file_picker, permission_handler,
+  # url_launcher, share_plus, mobile_scanner, flutter_secure_storage,
+  # shared_preferences, cached_network_image) are added per-feature when
+  # that screen's functionality is built, to keep the Android build clean.
 
 dev_dependencies:
   flutter_test:
