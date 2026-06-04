@@ -1,0 +1,4 @@
+# Shell scripts must keep LF endings so they run on Vercel's Linux build image
+# (a CRLF would make bash fail with a "bad interpreter" / "\r" error).
+*.sh text eol=lf
+vercel-build.sh text eol=lf
