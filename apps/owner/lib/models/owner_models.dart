@@ -99,12 +99,15 @@ class PlanBreakdown {
   final Color color;
 }
 
-/// A subscription plan offered to properties (used in the onboarding wizard).
+/// A ready-made subscription plan offered to properties (onboarding wizard).
+/// A plan bundles a FIXED set of services — the first [includedCount] of the
+/// service catalogue. (The alternative is a Custom plan: pick services à la carte.)
 class SubscriptionPlan {
   const SubscriptionPlan({
     required this.name,
     required this.monthly,
     required this.tagline,
+    required this.includedCount,
   });
 
   final String name;
@@ -112,6 +115,9 @@ class SubscriptionPlan {
   /// Price in ₹ per month.
   final int monthly;
   final String tagline;
+
+  /// How many services from the catalogue this plan includes (fixed features).
+  final int includedCount;
 }
 
 /// An app support ticket raised by a user (from any property) about the app
