@@ -12,6 +12,28 @@ class DemoData {
   static const ownerName = 'Yash Vachhan';
   static const ownerRole = 'Platform Owner';
 
+  /// Designations for a property's primary admin (onboarding step 3).
+  static const adminRoles = ['Chairman', 'Secretary', 'Manager'];
+
+  /// Subscription plans offered during onboarding (step 5).
+  static const plansCatalog = <SubscriptionPlan>[
+    SubscriptionPlan(
+      name: 'Basic',
+      monthly: 999,
+      tagline: 'Essentials for small societies',
+    ),
+    SubscriptionPlan(
+      name: 'Pro',
+      monthly: 2499,
+      tagline: 'Most popular — the full toolkit',
+    ),
+    SubscriptionPlan(
+      name: 'Enterprise',
+      monthly: 4999,
+      tagline: 'For large & multi-tower estates',
+    ),
+  ];
+
   static const navItems = <DashNavItem>[
     DashNavItem(icon: Icons.space_dashboard_rounded, label: 'Overview'),
     DashNavItem(icon: Icons.apartment_rounded, label: 'Properties'),

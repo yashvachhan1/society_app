@@ -105,6 +105,28 @@ void main() {
     expect(find.text('Onboard a new property'), findsOneWidget);
   });
 
+  testWidgets('wizard walks through every step to Review & Create', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+
+    await tester.pumpWidget(const OwnerApp());
+    await tester.pump();
+    await tester.tap(find.text('Onboarding'));
+    await tester.pumpAndSettle();
+
+    // Next through all five steps to reach Review.
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('Create Property'), findsOneWidget);
+    await tester.tap(find.text('Create Property'));
+    await tester.pump();
+    expect(find.textContaining('Property created'), findsOneWidget);
+  });
+
   testWidgets('support desk lists app tickets and filters them', (
     tester,
   ) async {

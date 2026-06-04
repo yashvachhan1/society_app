@@ -38,6 +38,14 @@ class _OnboardingViewState extends State<OnboardingView> {
     for (final m in DemoData.serviceModules) m.name: m.onByDefault,
   };
 
+  final _adminName = TextEditingController();
+  final _adminEmail = TextEditingController();
+  final _adminPhone = TextEditingController();
+  int _roleIndex = 0;
+
+  int _planIndex = 1; // Pro — most popular
+  bool _annual = false;
+
   int get _totalUnits => _towers * _floors * _unitsPerFloor;
   int get _enabledCount => _enabled.values.where((on) => on).length;
   bool get _isLast => _step == _steps.length - 1;
@@ -47,6 +55,9 @@ class _OnboardingViewState extends State<OnboardingView> {
     _name.dispose();
     _city.dispose();
     _address.dispose();
+    _adminName.dispose();
+    _adminEmail.dispose();
+    _adminPhone.dispose();
     super.dispose();
   }
 
@@ -98,13 +109,17 @@ class _OnboardingViewState extends State<OnboardingView> {
         return _detailsStep();
       case 1:
         return _structureStep();
+      case 2:
+        return _adminStep();
       case 3:
         return _ModuleGrid(
           enabled: _enabled,
           onToggle: (name, on) => setState(() => _enabled[name] = on),
         );
+      case 4:
+        return _subscriptionStep();
       default:
-        return _StepPlaceholder(name: _steps[_step]);
+        return _reviewStep();
     }
   }
 
@@ -169,6 +184,115 @@ class _OnboardingViewState extends State<OnboardingView> {
         ),
         const SizedBox(height: 20),
         _TotalUnitsBanner(total: _totalUnits, unitWord: unitWord),
+      ],
+    );
+  }
+
+  Widget _adminStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'This person gets a login to manage the property day to day.',
+          style: TextStyle(fontSize: 13.5, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 18),
+        _Field(
+          label: 'Admin name',
+          hint: 'e.g. Anil Kapoor',
+          controller: _adminName,
+        ),
+        const SizedBox(height: 16),
+        _Field(
+          label: 'Email',
+          hint: 'name@email.com',
+          controller: _adminEmail,
+        ),
+        const SizedBox(height: 16),
+        _Field(
+          label: 'Phone',
+          hint: '+91 98765 43210',
+          controller: _adminPhone,
+        ),
+        const SizedBox(height: 20),
+        const _FieldLabel('Designation'),
+        const SizedBox(height: 10),
+        _RoleChips(
+          roles: DemoData.adminRoles,
+          selected: _roleIndex,
+          onSelect: (i) => setState(() => _roleIndex = i),
+        ),
+      ],
+    );
+  }
+
+  Widget _subscriptionStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _PlanGrid(
+          selected: _planIndex,
+          onSelect: (i) => setState(() => _planIndex = i),
+        ),
+        const SizedBox(height: 20),
+        const _FieldLabel('Billing cycle'),
+        const SizedBox(height: 10),
+        _CycleToggle(
+          annual: _annual,
+          onChanged: (v) => setState(() => _annual = v),
+        ),
+        const SizedBox(height: 20),
+        _PriceBanner(plan: DemoData.plansCatalog[_planIndex], annual: _annual),
+      ],
+    );
+  }
+
+  Widget _reviewStep() {
+    final type = DemoData.propertyTypes[_typeIndex];
+    final plan = DemoData.plansCatalog[_planIndex];
+    const dash = '—';
+    return Column(
+      children: [
+        _SummaryRow(
+          icon: Icons.domain_rounded,
+          label: 'Property',
+          value: _name.text.isEmpty
+              ? type.name
+              : '${_name.text}  ·  ${type.name}',
+        ),
+        const Divider(height: 22, color: AppColors.divider),
+        _SummaryRow(
+          icon: Icons.place_rounded,
+          label: 'Location',
+          value: _city.text.isEmpty ? dash : _city.text,
+        ),
+        const Divider(height: 22, color: AppColors.divider),
+        _SummaryRow(
+          icon: Icons.grid_view_rounded,
+          label: 'Structure',
+          value:
+              '$_totalUnits ${type.unitLabel}  ($_towers × $_floors × $_unitsPerFloor)',
+        ),
+        const Divider(height: 22, color: AppColors.divider),
+        _SummaryRow(
+          icon: Icons.person_rounded,
+          label: 'Admin',
+          value: _adminName.text.isEmpty
+              ? dash
+              : '${_adminName.text}  ·  ${DemoData.adminRoles[_roleIndex]}',
+        ),
+        const Divider(height: 22, color: AppColors.divider),
+        _SummaryRow(
+          icon: Icons.tune_rounded,
+          label: 'Services',
+          value: '$_enabledCount of ${DemoData.serviceModules.length} enabled',
+        ),
+        const Divider(height: 22, color: AppColors.divider),
+        _SummaryRow(
+          icon: Icons.workspace_premium_rounded,
+          label: 'Plan',
+          value: '${plan.name}  ·  ${_annual ? 'Annual' : 'Monthly'}',
+        ),
       ],
     );
   }
@@ -434,48 +558,315 @@ class _TotalUnitsBanner extends StatelessWidget {
   }
 }
 
-class _StepPlaceholder extends StatelessWidget {
-  const _StepPlaceholder({required this.name});
+class _RoleChips extends StatelessWidget {
+  const _RoleChips({
+    required this.roles,
+    required this.selected,
+    required this.onSelect,
+  });
 
-  final String name;
+  final List<String> roles;
+  final int selected;
+  final ValueChanged<int> onSelect;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Center(
-        child: Column(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (var i = 0; i < roles.length; i++)
+          _Chip(
+            label: roles[i],
+            selected: i == selected,
+            onTap: () => onSelect(i),
+          ),
+      ],
+    );
+  }
+}
+
+/// A small pill used by the role and billing-cycle selectors.
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? AppColors.primary : AppColors.background,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanGrid extends StatelessWidget {
+  const _PlanGrid({required this.selected, required this.onSelect});
+
+  final int selected;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gap = 14.0;
+        final cols = constraints.maxWidth >= 640 ? 3 : 1;
+        final cardWidth =
+            ((constraints.maxWidth - gap * (cols - 1)) / cols).floorToDouble();
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
           children: [
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(20),
+            for (var i = 0; i < DemoData.plansCatalog.length; i++)
+              SizedBox(
+                width: cardWidth,
+                child: _PlanCard(
+                  plan: DemoData.plansCatalog[i],
+                  selected: i == selected,
+                  onTap: () => onSelect(i),
+                ),
               ),
-              child: const Icon(
-                Icons.tune_rounded,
-                size: 32,
-                color: AppColors.primary,
-              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    required this.plan,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final SubscriptionPlan plan;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.06)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.divider,
+            width: selected ? 1.6 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    plan.name,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (selected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '₹${plan.monthly}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Text(
+                  '  /mo',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
             Text(
-              '$name — coming next',
+              plan.tagline,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                fontSize: 11.5,
+                color: AppColors.textSecondary,
+                height: 1.3,
               ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'We will build this step after you review the flow.',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CycleToggle extends StatelessWidget {
+  const _CycleToggle({required this.annual, required this.onChanged});
+
+  final bool annual;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _Chip(
+          label: 'Monthly',
+          selected: !annual,
+          onTap: () => onChanged(false),
+        ),
+        _Chip(
+          label: 'Annual  ·  save 20%',
+          selected: annual,
+          onTap: () => onChanged(true),
+        ),
+      ],
+    );
+  }
+}
+
+class _PriceBanner extends StatelessWidget {
+  const _PriceBanner({required this.plan, required this.annual});
+
+  final SubscriptionPlan plan;
+  final bool annual;
+
+  @override
+  Widget build(BuildContext context) {
+    final perMonth = annual ? (plan.monthly * 0.8).round() : plan.monthly;
+    final cycleText = annual
+        ? 'billed ₹${perMonth * 12} / year'
+        : 'billed monthly';
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.receipt_long_rounded,
+            color: AppColors.primary,
+            size: 26,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${plan.name} plan  ·  $cycleText',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '₹$perMonth /month',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: AppColors.textSecondary),
+        const SizedBox(width: 14),
+        SizedBox(
+          width: 86,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

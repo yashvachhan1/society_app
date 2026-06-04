@@ -99,6 +99,21 @@ class PlanBreakdown {
   final Color color;
 }
 
+/// A subscription plan offered to properties (used in the onboarding wizard).
+class SubscriptionPlan {
+  const SubscriptionPlan({
+    required this.name,
+    required this.monthly,
+    required this.tagline,
+  });
+
+  final String name;
+
+  /// Price in ₹ per month.
+  final int monthly;
+  final String tagline;
+}
+
 /// An app support ticket raised by a user (from any property) about the app
 /// itself — a bug, payment issue, login trouble, feature request, etc. These
 /// escalate to the platform owner, not the society admin.
