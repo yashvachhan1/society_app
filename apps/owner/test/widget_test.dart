@@ -98,4 +98,26 @@ void main() {
     // Both entry points lead to the one onboarding flow.
     expect(find.text('Onboard a new property'), findsOneWidget);
   });
+
+  testWidgets('support desk lists app tickets and filters them', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+
+    await tester.pumpWidget(const OwnerApp());
+    await tester.pump();
+
+    await tester.tap(find.text('Support'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Support desk'), findsOneWidget);
+    expect(find.text('Open Tickets'), findsOneWidget);
+    // A resolved ticket is visible under the "All" filter.
+    expect(find.text('Dashboard loads very slowly'), findsOneWidget);
+
+    // Filtering to Open hides the resolved ticket.
+    await tester.tap(find.text('Open  3'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dashboard loads very slowly'), findsNothing);
+  });
 }

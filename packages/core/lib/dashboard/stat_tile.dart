@@ -79,6 +79,33 @@ class StatTile extends StatelessWidget {
   }
 }
 
+/// A responsive grid of [StatTile]s: four across on a wide monitor, two when
+/// narrow — so the values never get squeezed into mid-word wraps.
+class StatTileGrid extends StatelessWidget {
+  const StatTileGrid({super.key, required this.tiles});
+
+  final List<StatTile> tiles;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gap = 16.0;
+        final cols = constraints.maxWidth >= 1000 ? 4 : 2;
+        final cardWidth =
+            ((constraints.maxWidth - gap * (cols - 1)) / cols).floorToDouble();
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final tile in tiles) SizedBox(width: cardWidth, child: tile),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _TrendPill extends StatelessWidget {
   const _TrendPill({
     required this.trend,

@@ -18,7 +18,19 @@ class OverviewView extends StatelessWidget {
         children: [
           const _Greeting(),
           const SizedBox(height: 24),
-          _StatsGrid(width: width),
+          StatTileGrid(
+            tiles: [
+              for (final s in DemoData.stats)
+                StatTile(
+                  label: s.label,
+                  value: s.value,
+                  icon: s.icon,
+                  color: s.color,
+                  trend: s.trend,
+                  trendUp: s.trendUp,
+                ),
+            ],
+          ),
           const SizedBox(height: 22),
           _RevenueAndPlans(width: width),
           const SizedBox(height: 22),
@@ -50,38 +62,6 @@ class _Greeting extends StatelessWidget {
           'Here is how ${DemoData.platformName} is performing across all your properties.',
           style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
-      ],
-    );
-  }
-}
-
-class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.width});
-
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    const gap = 16.0;
-    final columns = width >= 1000 ? 4 : 2;
-    final cardWidth =
-        ((width - gap * (columns - 1)) / columns).floorToDouble();
-    return Wrap(
-      spacing: gap,
-      runSpacing: gap,
-      children: [
-        for (final s in DemoData.stats)
-          SizedBox(
-            width: cardWidth,
-            child: StatTile(
-              label: s.label,
-              value: s.value,
-              icon: s.icon,
-              color: s.color,
-              trend: s.trend,
-              trendUp: s.trendUp,
-            ),
-          ),
       ],
     );
   }

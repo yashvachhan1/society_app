@@ -98,3 +98,36 @@ class PlanBreakdown {
   final int count;
   final Color color;
 }
+
+/// An app support ticket raised by a user (from any property) about the app
+/// itself — a bug, payment issue, login trouble, feature request, etc. These
+/// escalate to the platform owner, not the society admin.
+class SupportTicket {
+  const SupportTicket({
+    required this.id,
+    required this.subject,
+    required this.user,
+    required this.property,
+    required this.category,
+    required this.priority,
+    required this.status,
+    required this.ago,
+    required this.icon,
+  });
+
+  final String id;
+  final String subject;
+  final String user;
+  final String property;
+
+  /// "Bug" | "Payment" | "Login" | "Feature" | "Other".
+  final String category;
+
+  /// "Low" | "Medium" | "High" | "Urgent".
+  final String priority;
+
+  /// "Open" | "In Progress" | "Resolved".
+  final String status;
+  final String ago;
+  final IconData icon;
+}

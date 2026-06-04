@@ -5,6 +5,7 @@ import '../data/demo_data.dart';
 import 'onboarding_view.dart';
 import 'overview_view.dart';
 import 'societies_view.dart';
+import 'support_view.dart';
 
 /// Root of the owner / super-admin console: the shared [DashboardShell] wired
 /// with the platform branding, navigation and pages. Overview + Societies are
@@ -23,18 +24,18 @@ class OwnerShell extends StatelessWidget {
       userName: DemoData.ownerName,
       userRole: DemoData.ownerRole,
       pageBuilder: (context, i) {
-        switch (i) {
-          case 0:
+        final item = DemoData.navItems[i];
+        switch (item.label) {
+          case 'Overview':
             return const OverviewView();
-          case 1:
+          case 'Properties':
             return const SocietiesView();
-          case 3:
+          case 'Support':
+            return const SupportView();
+          case 'Onboarding':
             return const OnboardingView();
           default:
-            return ComingSoon(
-              label: DemoData.navItems[i].label,
-              icon: DemoData.navItems[i].icon,
-            );
+            return ComingSoon(label: item.label, icon: item.icon);
         }
       },
     );

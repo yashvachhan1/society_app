@@ -17,7 +17,19 @@ class DashboardView extends StatelessWidget {
         children: [
           const _Greeting(),
           const SizedBox(height: 24),
-          _StatsGrid(width: width),
+          StatTileGrid(
+            tiles: [
+              for (final stat in DemoData.stats)
+                StatTile(
+                  label: stat.label,
+                  value: stat.value,
+                  icon: stat.icon,
+                  color: stat.color,
+                  trend: stat.trend,
+                  trendUp: stat.trendUp,
+                ),
+            ],
+          ),
           const SizedBox(height: 22),
           _ChartAndApprovals(width: width),
           const SizedBox(height: 22),
@@ -35,39 +47,6 @@ class DashboardView extends StatelessWidget {
 /// KPI tiles that reflow with the available width: four across on a wide
 /// monitor, two on a medium window, one when narrow — so the values and labels
 /// never get squeezed into mid-word wraps.
-class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.width});
-
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    const gap = 16.0;
-    // Two per row on phones/tablets, four across on a wide desktop.
-    final columns = width >= 1000 ? 4 : 2;
-    final cardWidth =
-        ((width - gap * (columns - 1)) / columns).floorToDouble();
-    return Wrap(
-      spacing: gap,
-      runSpacing: gap,
-      children: [
-        for (final stat in DemoData.stats)
-          SizedBox(
-            width: cardWidth,
-            child: StatTile(
-              label: stat.label,
-              value: stat.value,
-              icon: stat.icon,
-              color: stat.color,
-              trend: stat.trend,
-              trendUp: stat.trendUp,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 /// The collection chart and the pending-approvals card. They sit side by side
 /// on a wide layout and stack vertically once the content gets narrow.
 class _ChartAndApprovals extends StatelessWidget {
