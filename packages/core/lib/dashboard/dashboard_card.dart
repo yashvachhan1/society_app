@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:society_core/society_core.dart';
 
-/// The white rounded card used across the whole dashboard (stat tiles, titled
-/// sections, lists). Centralising the decoration here keeps the look identical
-/// everywhere and avoids duplicated `BoxDecoration` code (helps the SonarQube
-/// duplication score stay at zero).
+import '../theme/app_theme.dart';
+
+/// The white rounded card used across every web dashboard (stat tiles, titled
+/// sections, lists). Centralising the decoration keeps the look identical in
+/// both the admin and owner panels with zero duplicated `BoxDecoration` code.
 class DashboardCard extends StatelessWidget {
   const DashboardCard({
     super.key,

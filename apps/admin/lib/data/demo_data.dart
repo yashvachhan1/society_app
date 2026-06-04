@@ -12,19 +12,19 @@ class DemoData {
   static const adminName = 'Anil Kapoor';
   static const adminRole = 'Society Admin';
 
-  static const navItems = <AdminNavItem>[
-    AdminNavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
-    AdminNavItem(icon: Icons.people_alt_rounded, label: 'Residents'),
-    AdminNavItem(icon: Icons.receipt_long_rounded, label: 'Billing'),
-    AdminNavItem(
+  static const navItems = <DashNavItem>[
+    DashNavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
+    DashNavItem(icon: Icons.people_alt_rounded, label: 'Residents'),
+    DashNavItem(icon: Icons.receipt_long_rounded, label: 'Billing'),
+    DashNavItem(
       icon: Icons.build_circle_rounded,
       label: 'Complaints',
       badge: 14,
     ),
-    AdminNavItem(icon: Icons.campaign_rounded, label: 'Notices'),
-    AdminNavItem(icon: Icons.directions_walk_rounded, label: 'Visitors'),
-    AdminNavItem(icon: Icons.engineering_rounded, label: 'Staff'),
-    AdminNavItem(icon: Icons.settings_rounded, label: 'Settings'),
+    DashNavItem(icon: Icons.campaign_rounded, label: 'Notices'),
+    DashNavItem(icon: Icons.directions_walk_rounded, label: 'Visitors'),
+    DashNavItem(icon: Icons.engineering_rounded, label: 'Staff'),
+    DashNavItem(icon: Icons.settings_rounded, label: 'Settings'),
   ];
 
   static const stats = <AdminStat>[

@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:society_core/society_core.dart';
 
-import '../models/dashboard_models.dart';
+import '../theme/app_theme.dart';
 import 'dashboard_card.dart';
 
-/// A single KPI tile: a coloured icon, a trend indicator, the big value and a
-/// label. On narrow cards (phone, two-up) the trend collapses to just its arrow
-/// so nothing overflows; on wide cards it shows the full trend caption.
-class StatCard extends StatelessWidget {
-  const StatCard({super.key, required this.stat});
+/// A KPI tile: a coloured icon, a trend indicator, the big value and a label.
+/// On narrow cards the trend collapses to just its arrow so nothing overflows.
+/// Generic (primitive inputs) so both the admin and owner panels reuse it.
+class StatTile extends StatelessWidget {
+  const StatTile({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+    required this.trend,
+    required this.trendUp,
+  });
 
-  final AdminStat stat;
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final String trend;
+  final bool trendUp;
 
   @override
   Widget build(BuildContext context) {
@@ -28,18 +40,18 @@ class StatCard extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: stat.color.withValues(alpha: 0.12),
+                      color: color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(stat.icon, color: stat.color, size: 23),
+                    child: Icon(icon, color: color, size: 23),
                   ),
                   const Spacer(),
-                  _TrendPill(stat: stat, showText: showTrendText),
+                  _TrendPill(trend: trend, trendUp: trendUp, showText: showTrendText),
                 ],
               ),
               const SizedBox(height: 16),
               Text(
-                stat.value,
+                value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -50,7 +62,7 @@ class StatCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                stat.label,
+                label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -68,15 +80,20 @@ class StatCard extends StatelessWidget {
 }
 
 class _TrendPill extends StatelessWidget {
-  const _TrendPill({required this.stat, required this.showText});
+  const _TrendPill({
+    required this.trend,
+    required this.trendUp,
+    required this.showText,
+  });
 
-  final AdminStat stat;
+  final String trend;
+  final bool trendUp;
   final bool showText;
 
   @override
   Widget build(BuildContext context) {
-    final color = stat.trendUp ? AppColors.success : AppColors.warning;
-    final icon = stat.trendUp
+    final color = trendUp ? AppColors.success : AppColors.warning;
+    final icon = trendUp
         ? Icons.trending_up_rounded
         : Icons.trending_down_rounded;
     return Container(
@@ -95,7 +112,7 @@ class _TrendPill extends StatelessWidget {
           if (showText) ...[
             const SizedBox(width: 4),
             Text(
-              stat.trend,
+              trend,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

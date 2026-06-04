@@ -8,6 +8,7 @@
 library;
 
 export 'constants/app_constants.dart';
+export 'dashboard/dashboard.dart';
 export 'theme/app_theme.dart';
 export 'utils/formatters.dart';
 export 'widgets/widgets.dart';

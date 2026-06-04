@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:society_core/society_core.dart';
 
+import '../theme/app_theme.dart';
 import 'dashboard_card.dart';
 
 /// A titled white panel: a header row (title + optional trailing action) above
-/// an arbitrary body widget. Used for the chart, approvals and activity cards.
+/// an arbitrary body widget. The title is always Expanded+ellipsis so the
+/// header never overflows at any width.
 class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,

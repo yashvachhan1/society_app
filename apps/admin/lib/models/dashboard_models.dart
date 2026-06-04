@@ -1,15 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A sidebar navigation destination.
-class AdminNavItem {
-  const AdminNavItem({required this.icon, required this.label, this.badge});
-
-  final IconData icon;
-  final String label;
-
-  /// Optional count badge (e.g. open complaints). `null` hides the badge.
-  final int? badge;
-}
+// Sidebar nav items now use DashNavItem from society_core (shared kit).
 
 /// A KPI tile shown across the top of the dashboard.
 class AdminStat {

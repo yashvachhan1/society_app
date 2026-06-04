@@ -17,6 +17,9 @@ dependencies:
   # Formatting (currency, dates) used across apps
   intl: ^0.20.2
 
+  # Dashboard charts (shared by the admin + owner web panels)
+  fl_chart: ^0.70.2
+
 dev_dependencies:
   flutter_lints: ^6.0.0
 

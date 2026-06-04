@@ -3,9 +3,6 @@ import 'package:society_core/society_core.dart';
 
 import '../data/demo_data.dart';
 import '../models/dashboard_models.dart';
-import '../widgets/collection_chart.dart';
-import '../widgets/section_card.dart';
-import '../widgets/stat_card.dart';
 
 /// The dashboard page: greeting, KPI stat row, collection chart + pending
 /// approvals side by side, and a recent-activity feed.
@@ -14,30 +11,23 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final pad = constraints.maxWidth < 600 ? 16.0 : 28.0;
-        final width = constraints.maxWidth - pad * 2;
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(pad),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _Greeting(),
-              const SizedBox(height: 24),
-              _StatsGrid(width: width),
-              const SizedBox(height: 22),
-              _ChartAndApprovals(width: width),
-              const SizedBox(height: 22),
-              const SectionCard(
-                title: 'Recent Activity',
-                action: _MutedLabel('View all'),
-                child: _ActivityList(),
-              ),
-            ],
+    return DashboardPage(
+      builder: (context, width) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _Greeting(),
+          const SizedBox(height: 24),
+          _StatsGrid(width: width),
+          const SizedBox(height: 22),
+          _ChartAndApprovals(width: width),
+          const SizedBox(height: 22),
+          const SectionCard(
+            title: 'Recent Activity',
+            action: _MutedLabel('View all'),
+            child: _ActivityList(),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
@@ -62,7 +52,17 @@ class _StatsGrid extends StatelessWidget {
       runSpacing: gap,
       children: [
         for (final stat in DemoData.stats)
-          SizedBox(width: cardWidth, child: StatCard(stat: stat)),
+          SizedBox(
+            width: cardWidth,
+            child: StatTile(
+              label: stat.label,
+              value: stat.value,
+              icon: stat.icon,
+              color: stat.color,
+              trend: stat.trend,
+              trendUp: stat.trendUp,
+            ),
+          ),
       ],
     );
   }
@@ -77,10 +77,17 @@ class _ChartAndApprovals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const chart = SectionCard(
+    final chart = SectionCard(
       title: 'Maintenance Collection',
-      action: _MutedLabel('Last 6 months'),
-      child: CollectionChart(),
+      action: const _MutedLabel('Last 6 months'),
+      child: DashboardBarChart(
+        bars: [
+          for (final c in DemoData.collections) BarPoint(c.month, c.amount),
+        ],
+        maxY: 500,
+        axisStep: 100,
+        leftLabel: (v) => '₹${(v / 100).toStringAsFixed(0)}L',
+      ),
     );
     final approvals = SectionCard(
       title: 'Pending Approvals',
@@ -93,7 +100,7 @@ class _ChartAndApprovals extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Expanded(flex: 3, child: chart),
+            Expanded(flex: 3, child: chart),
             const SizedBox(width: 22),
             Expanded(flex: 2, child: approvals),
           ],

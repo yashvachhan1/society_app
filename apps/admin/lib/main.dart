@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:society_core/society_core.dart';
 
 import 'screens/admin_shell.dart';
-import 'theme/admin_theme.dart';
 
 void main() {
   runApp(const AdminApp());
@@ -19,7 +19,7 @@ class AdminApp extends StatelessWidget {
     return MaterialApp(
       title: 'Society Admin',
       debugShowCheckedModeBanner: false,
-      theme: AdminTheme.theme,
+      theme: DashboardTheme.theme,
       home: const AdminShell(),
     );
   }

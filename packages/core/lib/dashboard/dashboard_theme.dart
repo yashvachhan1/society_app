@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:society_core/society_core.dart';
 
-/// Admin web dashboard theme.
-///
-/// Reuses the shared blue palette from `society_core` (so the resident app and
-/// the admin panel look identical) but tuned for a desktop browser: compact
-/// buttons and standard visual density instead of mobile touch sizing.
-class AdminTheme {
-  const AdminTheme._();
+import '../theme/app_theme.dart';
+
+/// Web dashboard theme — the shared blue palette (same as the resident app)
+/// tuned for a desktop browser: compact buttons and standard visual density.
+/// Used by both the admin and owner panels so they look identical.
+class DashboardTheme {
+  const DashboardTheme._();
 
   static ThemeData get theme {
     final base = AppTheme.lightTheme;
