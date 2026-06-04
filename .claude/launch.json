@@ -6,6 +6,12 @@
       "runtimeExecutable": "C:\\flutter\\bin\\flutter.bat",
       "runtimeArgs": ["run", "-d", "web-server", "--web-port", "5000"],
       "port": 5000
+    },
+    {
+      "name": "admin-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5051", "--directory", "apps/admin/build/web"],
+      "port": 5051
     }
   ]
 }
