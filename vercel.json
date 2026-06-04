@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "echo \"no npm install needed — Flutter handles deps in the build step\"",
+  "installCommand": "echo \"Flutter handles dependencies during the build step\"",
   "buildCommand": "bash vercel-build.sh",
-  "outputDirectory": "apps/admin/build/web",
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

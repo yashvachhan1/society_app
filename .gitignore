@@ -34,6 +34,10 @@ migrate_working_dir/
 **/build/
 **/coverage/
 
+# Vercel (build script copies the chosen app's web output here)
+/public/
+.vercel/
+
 # Symbolication related
 app.*.symbols
 
