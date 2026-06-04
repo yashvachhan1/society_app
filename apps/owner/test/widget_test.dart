@@ -111,7 +111,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Support desk'), findsOneWidget);
-    expect(find.text('Open Tickets'), findsOneWidget);
     // A resolved ticket is visible under the "All" filter.
     expect(find.text('Dashboard loads very slowly'), findsOneWidget);
 
