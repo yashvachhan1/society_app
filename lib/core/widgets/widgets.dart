@@ -3,6 +3,7 @@
 library;
 
 export 'app_card.dart';
+export 'date_field.dart';
 export 'detail_row.dart';
 export 'empty_state.dart';
 export 'icon_chip.dart';

@@ -131,24 +131,11 @@ class _ProfileHeader extends StatelessWidget {
         children: [
           Stack(
             children: [
-              Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: Center(
-                  child: Text(
-                    user.initials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+              // users.photo_url — falls back to initials when not set
+              PhotoAvatar(
+                initials: user.initials,
+                photoUrl: user.photoUrl,
+                onLight: true,
               ),
               if (membership.isActive)
                 Positioned(
@@ -262,6 +249,13 @@ class _AccountCard extends StatelessWidget {
           isPlaceholder: !user.hasEmail,
         ),
         IconDetailRow(
+          icon: Icons.photo_camera_outlined,
+          label: 'Profile photo',
+          value: user.photoUrl == null ? 'Not added' : 'Added',
+          color: AppColors.primary,
+          isPlaceholder: user.photoUrl == null,
+        ),
+        IconDetailRow(
           icon: Icons.translate_outlined,
           label: 'Language',
           value: '${language.nativeLabel} (${language.label})',
@@ -335,6 +329,14 @@ class _MembershipCard extends StatelessWidget {
           value: formatDate(membership.startDate),
           color: AppColors.warning,
         ),
+        // memberships.end_date — only set when the admin records a move-out
+        if (membership.endDate != null)
+          IconDetailRow(
+            icon: Icons.event_busy_outlined,
+            label: 'Valid till',
+            value: formatDate(membership.endDate),
+            color: AppColors.error,
+          ),
       ],
     );
   }
@@ -414,6 +416,7 @@ class _EditProfileSheet extends StatefulWidget {
 class _EditProfileSheetState extends State<_EditProfileSheet> {
   late final _name = TextEditingController(text: widget.user.name);
   late final _email = TextEditingController(text: widget.user.email ?? '');
+  late String? _photoUrl = widget.user.photoUrl;
 
   @override
   void dispose() {
@@ -444,6 +447,32 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
             ),
           ),
           const SizedBox(height: 18),
+          Center(
+            child: Column(
+              children: [
+                PhotoAvatar(
+                  initials: widget.user.initials,
+                  photoUrl: _photoUrl,
+                  radius: 38,
+                  onEdit: () => setState(
+                    () => _photoUrl = _photoUrl == null ? 'profile.jpg' : null,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _photoUrl == null ? 'Add a photo' : 'Photo added',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: _photoUrl == null
+                        ? AppColors.textSecondary
+                        : AppColors.success,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           LabelledField(
             label: 'Full name',
             required: true,

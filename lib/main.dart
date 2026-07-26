@@ -7,6 +7,7 @@ import 'features/auth/screens/language_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/otp_screen.dart';
 import 'features/auth/screens/splash_screen.dart';
+import 'features/common/screens/empty_module_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/registration/screens/pending_approval_screen.dart';
@@ -19,9 +20,8 @@ import 'features/shell/main_shell.dart';
 /// OTP → the signed-in shell. New residents branch off to registration, which
 /// ends at the pending-approval screen until an admin approves them.
 ///
-/// The signed-in area has two tabs: Home (flat, society, membership) and
-/// Account (the resident's `users` record). Billing, notices and complaints
-/// arrive with their modules.
+/// Inside the shell the Account tab has real data; every other module keeps its
+/// tile on the home grid but opens [EmptyModuleScreen] until it is built.
 final _router = GoRouter(
   initialLocation: AppRoutes.splash,
   routes: [
@@ -46,7 +46,76 @@ final _router = GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (_, _) => const HomeScreen(),
+              routes: [
+                GoRoute(
+                  path: 'services',
+                  builder: (_, _) => const EmptyModuleScreen(
+                    title: 'Home Services',
+                    icon: Icons.handyman,
+                  ),
+                ),
+                GoRoute(
+                  path: 'complaints',
+                  builder: (_, _) => const EmptyModuleScreen(
+                    title: 'Complaints',
+                    icon: Icons.build_circle,
+                  ),
+                ),
+                GoRoute(
+                  path: 'guests',
+                  builder: (_, _) => const EmptyModuleScreen(
+                    title: 'Guests',
+                    icon: Icons.qr_code_scanner,
+                  ),
+                ),
+                GoRoute(
+                  path: 'staff',
+                  builder: (_, _) => const EmptyModuleScreen(
+                    title: 'Staff',
+                    icon: Icons.people,
+                  ),
+                ),
+                GoRoute(
+                  path: 'family',
+                  builder: (_, _) => const EmptyModuleScreen(
+                    title: 'Family',
+                    icon: Icons.family_restroom,
+                  ),
+                ),
+                GoRoute(
+                  path: 'vehicles',
+                  builder: (_, _) => const EmptyModuleScreen(
+                    title: 'Vehicles',
+                    icon: Icons.directions_car,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.billing,
+              builder: (_, _) => const EmptyModuleScreen(
+                title: 'Payments',
+                icon: Icons.receipt_long,
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.notices,
+              builder: (_, _) => const EmptyModuleScreen(
+                title: 'Notices',
+                icon: Icons.campaign,
+              ),
+            ),
           ],
         ),
         StatefulShellBranch(

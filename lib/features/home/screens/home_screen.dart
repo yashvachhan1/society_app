@@ -2,38 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:society_app/core/constants/app_constants.dart';
-import 'package:society_app/core/data/demo_data.dart';
-import 'package:society_app/core/models/models.dart';
 import 'package:society_app/core/theme/app_theme.dart';
-import 'package:society_app/core/utils/formatters.dart';
 import 'package:society_app/core/widgets/widgets.dart';
+import '../models/home_module.dart';
 
-/// The resident's dashboard.
-///
-/// Every value on this screen comes from a database record: the signed-in
-/// `users` row, their `memberships` row, and the `units` / `towers` /
-/// `societies` rows those point at.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  static const List<HomeModule> _modules = [
+    HomeModule(icon: Icons.receipt_long, label: 'Billing', color: Color(0xFF1565C0), route: AppRoutes.billing),
+    HomeModule(icon: Icons.campaign, label: 'Notices', color: Color(0xFF6A1B9A), route: AppRoutes.notices),
+    HomeModule(icon: Icons.build_circle, label: 'Complaints', color: Color(0xFFE65100), route: AppRoutes.complaints),
+    HomeModule(icon: Icons.qr_code_scanner, label: 'Guests', color: Color(0xFF00695C), route: AppRoutes.guests),
+    HomeModule(icon: Icons.handyman, label: 'Services', color: Color(0xFF00838F), route: AppRoutes.services),
+    HomeModule(icon: Icons.people, label: 'Staff', color: Color(0xFF37474F), route: AppRoutes.staff),
+    HomeModule(icon: Icons.family_restroom, label: 'Family', color: Color(0xFF2E7D32), route: AppRoutes.family),
+    HomeModule(icon: Icons.directions_car, label: 'Vehicles', color: Color(0xFF4527A0), route: AppRoutes.vehicles),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final user = DemoData.signedInUser;
-    final membership = DemoData.currentMembership;
-    final society = DemoData.currentSociety;
-    final unit = DemoData.currentUnit;
-    final tower = DemoData.currentTower;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          _HomeHeader(
-            user: user,
-            membership: membership,
-            unit: unit,
-            tower: tower,
-          ),
+          const _HomeHeader(),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -41,18 +34,29 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 4),
-                  const SectionHeader(title: 'My Flat'),
-                  const SizedBox(height: 12),
-                  _FlatCard(unit: unit, tower: tower),
+                  const SectionHeader(title: 'Services'),
+                  const SizedBox(height: 14),
+                  const _ModuleGrid(modules: _modules),
                   const SizedBox(height: 22),
-                  const SectionHeader(title: 'My Society'),
+                  SectionHeader(
+                    title: 'Recent Notices',
+                    actionLabel: 'See all',
+                    onAction: () => context.go(AppRoutes.notices),
+                  ),
                   const SizedBox(height: 12),
-                  _SocietyCard(society: society),
-                  const SizedBox(height: 22),
-                  const SectionHeader(title: 'Membership'),
-                  const SizedBox(height: 12),
-                  _MembershipCard(membership: membership),
-                  const SizedBox(height: 8),
+                  const _MiniNoticeCard(
+                    title: 'Water Supply Shutdown',
+                    description: 'No water on 5th June from 10 AM to 2 PM',
+                    priority: 'Urgent',
+                    time: '2h ago',
+                  ),
+                  const SizedBox(height: 10),
+                  const _MiniNoticeCard(
+                    title: 'Society Meeting',
+                    description: 'Monthly meeting on Sunday at 11 AM in the clubhouse',
+                    priority: 'Important',
+                    time: '1d ago',
+                  ),
                 ],
               ),
             ),
@@ -64,86 +68,67 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({
-    required this.user,
-    required this.membership,
-    required this.unit,
-    required this.tower,
-  });
-
-  final AppUser user;
-  final Membership membership;
-  final Unit unit;
-  final Tower tower;
+  const _HomeHeader();
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
+    return const DecoratedBox(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Good Morning!',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      user.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    _FlatBadge(
-                      label:
-                          '${unit.labelWith(tower)} • ${membership.role.label}',
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () => context.go(AppRoutes.profile),
-                child: CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Colors.white24,
-                  child: Text(
-                    user.initials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          padding: EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: _HeaderContent(),
         ),
       ),
     );
   }
 }
 
-class _FlatBadge extends StatelessWidget {
-  const _FlatBadge({required this.label});
+class _HeaderContent extends StatelessWidget {
+  const _HeaderContent();
 
-  final String label;
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Good Morning!',
+                  style: TextStyle(color: Colors.white70, fontSize: 13)),
+              SizedBox(height: 3),
+              Text('Rahul Sharma',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  )),
+              SizedBox(height: 6),
+              _FlatBadge(),
+            ],
+          ),
+        ),
+        GestureDetector(
+          onTap: () => context.go(AppRoutes.profile),
+          child: const CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.white24,
+            child: Icon(Icons.person, color: Colors.white, size: 28),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FlatBadge extends StatelessWidget {
+  const _FlatBadge();
 
   @override
   Widget build(BuildContext context) {
@@ -153,131 +138,157 @@ class _FlatBadge extends StatelessWidget {
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white, fontSize: 12),
+      child: const Text('Flat 301 • Owner',
+          style: TextStyle(color: Colors.white, fontSize: 12)),
+    );
+  }
+}
+
+class _ModuleGrid extends StatelessWidget {
+  const _ModuleGrid({required this.modules});
+
+  final List<HomeModule> modules;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (final m in modules.take(4)) _ModuleTile(module: m),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (final m in modules.skip(4)) _ModuleTile(module: m),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ModuleTile extends StatelessWidget {
+  const _ModuleTile({required this.module});
+
+  final HomeModule module;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.go(module.route),
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: module.color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(module.icon, color: module.color, size: 30),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              module.label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// The `units` record: number, wing, floor, type, carpet area, parking.
-class _FlatCard extends StatelessWidget {
-  const _FlatCard({required this.unit, required this.tower});
+class _MiniNoticeCard extends StatelessWidget {
+  const _MiniNoticeCard({
+    required this.title,
+    required this.description,
+    required this.priority,
+    required this.time,
+  });
 
-  final Unit unit;
-  final Tower tower;
-
-  @override
-  Widget build(BuildContext context) {
-    return DetailCard(
-      title: 'Flat Details',
-      rows: [
-        IconDetailRow(
-          icon: Icons.home_outlined,
-          label: 'Flat number',
-          value: unit.unitNo,
-          color: AppColors.primary,
-        ),
-        IconDetailRow(
-          icon: Icons.apartment_outlined,
-          label: 'Wing / Tower',
-          value: tower.name,
-          color: AppColors.accent,
-        ),
-        IconDetailRow(
-          icon: Icons.stairs_outlined,
-          label: 'Floor',
-          value: '${unit.floor}',
-          color: AppColors.success,
-        ),
-        IconDetailRow(
-          icon: Icons.meeting_room_outlined,
-          label: 'Unit type',
-          value: unit.unitType,
-          color: AppColors.warning,
-        ),
-        IconDetailRow(
-          icon: Icons.straighten_outlined,
-          label: 'Carpet area',
-          value: '${unit.areaSqft.toStringAsFixed(0)} sq.ft',
-          color: AppColors.primary,
-        ),
-        IconDetailRow(
-          icon: Icons.local_parking_outlined,
-          label: 'Parking slots',
-          value: '${unit.parkingSlots}',
-          color: AppColors.accent,
-        ),
-      ],
-    );
-  }
-}
-
-/// The `societies` record: name, registration number, address.
-class _SocietyCard extends StatelessWidget {
-  const _SocietyCard({required this.society});
-
-  final Society society;
+  final String title;
+  final String description;
+  final String priority;
+  final String time;
 
   @override
   Widget build(BuildContext context) {
-    return DetailCard(
-      title: 'Society Details',
-      rows: [
-        IconDetailRow(
-          icon: Icons.location_city_outlined,
-          label: 'Name',
-          value: society.name,
-          color: AppColors.primary,
-        ),
-        IconDetailRow(
-          icon: Icons.badge_outlined,
-          label: 'Registration number',
-          value: society.registrationNo,
-          color: AppColors.success,
-        ),
-        IconDetailRow(
-          icon: Icons.location_on_outlined,
-          label: 'Address',
-          value: society.fullAddress,
-          color: AppColors.accent,
-        ),
-      ],
-    );
-  }
-}
-
-/// The `memberships` record: role, status, and when it started.
-class _MembershipCard extends StatelessWidget {
-  const _MembershipCard({required this.membership});
-
-  final Membership membership;
-
-  @override
-  Widget build(BuildContext context) {
-    return DetailCard(
-      title: 'Membership',
-      rows: [
-        IconDetailRow(
-          icon: Icons.verified_user_outlined,
-          label: 'Role',
-          value: membership.role.label,
-          color: AppColors.primary,
-        ),
-        IconDetailRow(
-          icon: Icons.task_alt_outlined,
-          label: 'Status',
-          value: membership.status.label,
-          color: membership.isActive ? AppColors.success : AppColors.warning,
-        ),
-        IconDetailRow(
-          icon: Icons.event_outlined,
-          label: 'Member since',
-          value: formatDate(membership.startDate),
-          color: AppColors.accent,
-        ),
-      ],
+    final color = StatusChip.colorForStatus(priority);
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      borderRadius: 14,
+      onTap: () => context.go(AppRoutes.notices),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 4,
+            height: 50,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    StatusChip(label: priority, color: color),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  time,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

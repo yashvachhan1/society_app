@@ -7,19 +7,16 @@ declares every route.
 
 ## What's inside
 
-- `main()` — calls `runApp(const SocietyApp())`.
-- `SocietyApp` — `MaterialApp.router` wired with `AppTheme.lightTheme`.
-- `GoRouter` configuration:
-  - `/` → `SplashScreen` · `/language` → `LanguageScreen`
-  - `/login` → `LoginScreen` · `/register` → `RegistrationScreen`
-  - `/pending-approval` → `PendingApprovalScreen`
-  - `/otp` → `OtpScreen` (phone passed via `extra`)
-  - `StatefulShellRoute.indexedStack` → `MainShell` with two branches:
-    **Home** `/home` and **Account** `/profile`
+- `main()` → `runApp(const SocietyApp())`; `SocietyApp` is a `MaterialApp.router`
+- Routes: `/` splash · `/language` · `/login` · `/register` ·
+  `/pending-approval` · `/otp`
+- `StatefulShellRoute.indexedStack` → `MainShell` with four branches:
+  **Home** `/home`, **Payments** `/billing`, **Notices** `/notices`,
+  **Account** `/profile`
+- Inside Home: `services`, `complaints`, `guests`, `staff`, `family`,
+  `vehicles` — each an `EmptyModuleScreen` for now
 
 ## Notes
 
 Onboarding is a straight line: splash → language → login → OTP → shell. New
-residents branch to registration, which ends at pending approval.
-
-To add a screen: constant in `AppRoutes` → route here → link it from the UI.
+residents branch to registration, ending at pending approval.

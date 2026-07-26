@@ -3,9 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:society_app/core/theme/app_theme.dart';
 
-/// App shell that hosts the primary tabs behind a persistent bottom
-/// navigation bar. Two tabs today — Home and Account; more arrive with the
-/// billing, notices and complaints modules.
+/// App shell that hosts the four primary tabs behind a persistent bottom
+/// navigation bar. Secondary screens push on top while the bar stays visible.
 class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.navigationShell});
 
@@ -16,6 +15,16 @@ class MainShell extends StatelessWidget {
       icon: Icons.home_outlined,
       activeIcon: Icons.home_rounded,
       label: 'Home',
+    ),
+    _NavDestination(
+      icon: Icons.account_balance_wallet_outlined,
+      activeIcon: Icons.account_balance_wallet,
+      label: 'Payments',
+    ),
+    _NavDestination(
+      icon: Icons.campaign_outlined,
+      activeIcon: Icons.campaign,
+      label: 'Notices',
     ),
     _NavDestination(
       icon: Icons.person_outline,

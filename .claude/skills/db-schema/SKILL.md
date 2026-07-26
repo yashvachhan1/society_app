@@ -1,104 +1,113 @@
 ---
 name: db-schema
-description: PostgreSQL rules for this platform — multi-tenant table design, naming, keys, indexes, money and timestamps, migrations, and the core schema (properties, units, users, modules, bills, complaints, tickets). Load before creating or altering any table, writing a migration, or designing a query.
+description: PostgreSQL rules for this platform — multi-tenant table design, naming, keys, indexes, money and timestamps, migrations, and which tables exist today. Load before creating or altering any table, writing a migration, or designing a query.
 ---
 
 # PostgreSQL schema rules
 
-One database, many properties (tenants). Isolation is enforced by a
-`property_id` column plus disciplined queries — see `api-security`.
+The authoritative spec is **`Society-Management-Platform-DB-Schema-v1.0 (1).docx`**
+at the repo root. Follow it — do not invent names. The live SQL lives in `db/`.
+
+One database, many societies (tenants). Isolation comes from a `society_id`
+column plus disciplined queries — see `api-security`.
+
+## What exists today
+
+`db/migrations/001_identity_and_units.sql` creates the tables the current app
+flow (registration → login → dashboard) needs:
+
+`users` · `societies` · `towers` · `units` · `files` · `memberships` ·
+`unit_occupancies`
+
+The document defines ~45 tables in total. The rest (billing, accounting,
+communication, helpdesk, amenities, staff, gate, meetings, notifications) get
+their own numbered migrations when those modules are built. Do not create a
+table before its feature.
 
 ## Naming
 
-- Tables plural `snake_case`: `properties`, `property_units`, `maintenance_bills`
+- Tables plural `snake_case`: `societies`, `unit_occupancies`, `journal_lines`
 - Columns `snake_case`; primary key `id`; foreign key `<table_singular>_id`
-- Booleans read as a fact: `is_active`, `is_paid`
-- Timestamps `*_at`; no ambiguous `date`/`time` names
-- No reserved words (`user` → `users`, `order` → `orders`)
+- Timestamps `*_at`; dates `*_date` / `*_on`
+- No reserved words (`user` → `users`)
 
 ## Every table gets
 
 ```sql
-id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-created_at   timestamptz NOT NULL DEFAULT now(),
-updated_at   timestamptz NOT NULL DEFAULT now()
+id         BIGSERIAL PRIMARY KEY,
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 ```
 
-Every **tenant-owned** table also gets:
+`updated_at` is maintained by the shared `set_updated_at()` trigger — attach it
+to every new table.
+
+Every **tenant-scoped** table also gets:
 
 ```sql
-property_id  uuid NOT NULL REFERENCES properties(id) ON DELETE CASCADE
+society_id BIGINT NOT NULL REFERENCES societies (id) ON DELETE CASCADE
 ```
 
-and an index on it (queries always filter by it):
+with an index, because every query filters on it:
 
 ```sql
-CREATE INDEX idx_bills_property ON bills (property_id);
-CREATE INDEX idx_bills_property_status ON bills (property_id, status);
+CREATE INDEX idx_units_society        ON units (society_id);
+CREATE INDEX idx_units_society_status ON units (society_id, status);
 ```
 
-Compound indexes start with `property_id` — that is the leading filter in every
-query. Unique constraints are scoped too:
-`UNIQUE (property_id, unit_number)`, never `UNIQUE (unit_number)`.
+Composite indexes **lead with `society_id`**. Unique constraints are scoped the
+same way: `UNIQUE (society_id, tower_id, unit_no)`, never `UNIQUE (unit_no)`.
 
 ## Types
 
-- Ids: `uuid` (never sequential integers — they leak counts and are guessable)
-- **Money: `numeric(12,2)`. Never `float`/`double`.** Store rupees, not paise,
-  and format for display with `formatRupees` in the Flutter apps.
-- Time: `timestamptz` (UTC), never naive `timestamp`
-- Short enums: `text` + a `CHECK` constraint (easier to extend than PG enums)
-  e.g. `status text NOT NULL CHECK (status IN ('open','in_progress','resolved'))`
-- Free-form extras: `jsonb` — but never for data you filter or join on
-- Phone/email: `text` with a `CHECK`, phone stored normalized (`+91XXXXXXXXXX`)
+- Ids: `BIGSERIAL` (per the schema document)
+- **Money: `NUMERIC(12,2)`. Never `float`/`double`.** Rupees, not paise.
+- Rates/percentages: `NUMERIC(8,4)`
+- Time: `TIMESTAMPTZ` (UTC), never naive `timestamp`
+- Enums: `TEXT` + a `CHECK` constraint — adding a value is then a small
+  migration instead of a type change:
+  `status TEXT NOT NULL CHECK (status IN ('pending','active','rejected','ended'))`
+- Flexible config only: `jsonb` (feature-flag config, notification payloads) —
+  never for data you filter or join on
+- Phone: `VARCHAR(15)`, stored normalised `+919876543210`, with a format `CHECK`
 
 ## Integrity
 
-- Declare every foreign key with an explicit `ON DELETE` (`CASCADE` for rows
-  that belong to a property, `RESTRICT` where deletion should be blocked).
-- `NOT NULL` by default; make nullability a deliberate choice.
-- Soft-delete only where history matters (`deleted_at timestamptz`); then every
-  read filters `deleted_at IS NULL`. Otherwise delete for real.
+- Every foreign key declares `ON DELETE` explicitly — `CASCADE` for rows that
+  belong to a society, `SET NULL` for optional references (`approved_by`).
+- `NOT NULL` by default; nullability is a deliberate decision.
+- Financial tables are append-oriented: corrections are **reversing entries**,
+  never updates or deletes.
+- Use partial unique indexes for "only one current X" rules, e.g. one active
+  membership per (user, society, role, unit), one current owner per unit.
 
-## Core schema sketch
+## Key relationships to respect
 
-```
-properties         id, name, type, city, address, status, plan, is_custom_plan,
-                   created_at, updated_at
-property_modules   property_id, module_key, is_enabled          -- modular services
-property_towers    property_id, name, floors
-property_units     property_id, tower_id, unit_number, floor, type
-users              id, phone, email, password_hash, name, role, created_at
-property_members   property_id, user_id, unit_id, role, relation, is_active
-maintenance_bills  property_id, unit_id, period, amount, due_date, status
-payments           property_id, bill_id, gateway_payment_id UNIQUE, amount, status
-complaints         property_id, unit_id, category, priority, status, description
-notices            property_id, title, body, published_at
-visitors           property_id, unit_id, name, phone, purpose, entry_at, exit_at
-support_tickets    property_id, user_id, category, priority, status, subject
-```
-
-`property_modules` is what makes services modular: the backend reads it to allow
-or reject a module, and the apps read it to show or hide a feature.
-`users` is global (a person can belong to more than one property);
-`property_members` is the tenant-scoped join that carries their role there.
+- `users` 1–N `memberships` N–1 `societies` — permissions **always** resolve
+  from a membership, never from a global flag on the user. The auditor
+  provision is simply several `accountant` memberships for one user.
+- `units` 1–N `unit_occupancies` — the current occupant is the row with a NULL
+  `end_date`; history is kept so dues liability survives an ownership transfer.
+- A self-registered resident's membership starts at `status = 'pending'` until a
+  society admin approves it.
 
 ## Migrations
 
-- Every schema change is a migration file, ordered and committed —
-  never an ad-hoc `ALTER` run by hand.
-- Name them `NNN_verb_object.sql` (`003_add_property_modules.sql`).
-- Migrations are **append-only**: to fix something, write a new migration.
-- Each has a matching `down` where reversal is possible.
+- Every schema change is a numbered file in `db/migrations/`, committed —
+  never an ad-hoc `ALTER` typed into pgAdmin.
+- Name them `NNN_verb_object.sql`, with a matching `NNN_..._down.sql`.
+- Migrations are **append-only**: to fix something, write a new one. Never edit
+  a migration that has already been run.
 - Adding a `NOT NULL` column to a live table: add nullable → backfill → set
   `NOT NULL`, in separate steps.
-- Seed/demo data lives in a seed script, never inside a migration.
+- Seed/demo data lives in `db/seed/`, never inside a migration, and must be
+  safe to re-run (`ON CONFLICT DO NOTHING` or a `NOT EXISTS` guard).
 
 ## Query habits
 
-- `SELECT` the columns you need, not `SELECT *`, in application code.
-- Filter by `property_id` **first** in every `WHERE`.
-- Paginate with `LIMIT/OFFSET` (or keyset for big tables); never fetch a whole
-  table into Node and slice it there.
-- Check `EXPLAIN` when a list query starts feeling slow — a missing
-  `(property_id, ...)` index is usually the cause.
+- `SELECT` the columns you need, not `SELECT *`.
+- Filter by `society_id` **first** in every `WHERE`, taken from the
+  authenticated token — never from the request body.
+- Paginate lists; never fetch a table into Node and slice it there.
+- Reach for `EXPLAIN` when a list query slows down — a missing
+  `(society_id, …)` index is usually the cause.

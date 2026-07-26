@@ -5,6 +5,7 @@ import 'package:society_app/core/constants/app_constants.dart';
 import 'package:society_app/core/data/demo_data.dart';
 import 'package:society_app/core/models/models.dart';
 import 'package:society_app/core/theme/app_theme.dart';
+import 'package:society_app/core/utils/formatters.dart';
 import 'package:society_app/core/widgets/widgets.dart';
 
 /// Resident self-registration (requirement R4.1.5): the resident picks their
@@ -38,10 +39,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _otp = TextEditingController();
   bool _otpSent = false;
 
-  // users.name / users.email / users.language
+  // users.name / users.email / users.language / users.photo_url
   final _name = TextEditingController();
   final _email = TextEditingController();
   AppLanguage _language = AppLanguage.en;
+  String? _photoName;
 
   // memberships.society_id
   int? _societyId;
@@ -50,6 +52,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   int? _towerId;
   int? _unitId;
   OccupancyType _occupancy = OccupancyType.owner;
+
+  // unit_occupancies.agreement_start / agreement_end — tenants only
+  DateTime? _agreementStart;
+  DateTime? _agreementEnd;
 
   // files — the proof document
   String? _proofName;
@@ -88,10 +94,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       case 2:
         return _societyId != null;
       case 3:
+        // Tenants must supply their agreement dates; owners have none.
+        if (_occupancy == OccupancyType.tenant &&
+            (_agreementStart == null || _agreementEnd == null)) {
+          return false;
+        }
         return _unitId != null;
       default:
         return _proofName != null;
     }
+  }
+
+  /// Initials preview for the photo avatar while the name is being typed.
+  static String _initialsFrom(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return (parts.first[0] + parts.last[0]).toUpperCase();
   }
 
   void _next() {
@@ -228,6 +247,32 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           title: 'About you',
           subtitle: 'This is how your name appears to the committee and neighbours.',
         ),
+        Center(
+          child: Column(
+            children: [
+              PhotoAvatar(
+                initials: _initialsFrom(_name.text),
+                photoUrl: _photoName,
+                radius: 42,
+                onEdit: () => setState(
+                  () => _photoName = _photoName == null ? 'profile.jpg' : null,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                _photoName == null ? 'Add a photo (optional)' : 'Photo added',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: _photoName == null
+                      ? AppColors.textSecondary
+                      : AppColors.success,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 22),
         LabelledField(
           label: 'Full name',
           required: true,
@@ -351,6 +396,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             selected: type == _occupancy,
             onTap: () => setState(() => _occupancy = type),
           ),
+        // Rent agreement dates apply to tenants only; they drive the expiry
+        // reminders the society admin receives.
+        if (_occupancy == OccupancyType.tenant) ...[
+          const SizedBox(height: 18),
+          DateField(
+            label: 'Agreement start',
+            required: true,
+            value: _agreementStart,
+            onChanged: (d) => setState(() => _agreementStart = d),
+            helper: 'As written on your rent agreement.',
+          ),
+          const SizedBox(height: 16),
+          DateField(
+            label: 'Agreement end',
+            required: true,
+            value: _agreementEnd,
+            firstDate: _agreementStart,
+            onChanged: (d) => setState(() => _agreementEnd = d),
+            helper: 'You will get a reminder before it expires.',
+          ),
+        ],
       ],
     );
   }
@@ -387,6 +453,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           occupancy: _occupancy,
           name: _name.text.trim(),
           phone: _phone.text.trim(),
+          hasPhoto: _photoName != null,
+          agreementStart: _agreementStart,
+          agreementEnd: _agreementEnd,
         ),
       ],
     );
@@ -608,6 +677,9 @@ class _ReviewSummary extends StatelessWidget {
     required this.occupancy,
     required this.name,
     required this.phone,
+    required this.hasPhoto,
+    required this.agreementStart,
+    required this.agreementEnd,
   });
 
   final int? societyId;
@@ -615,6 +687,9 @@ class _ReviewSummary extends StatelessWidget {
   final OccupancyType occupancy;
   final String name;
   final String phone;
+  final bool hasPhoto;
+  final DateTime? agreementStart;
+  final DateTime? agreementEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -655,6 +730,17 @@ class _ReviewSummary extends StatelessWidget {
                 : '${tower.name}, Flat ${unit.unitNo}',
           ),
           _SummaryLine(label: 'You are', value: occupancy.label),
+          _SummaryLine(
+            label: 'Photo',
+            value: hasPhoto ? 'Added' : 'Not added',
+          ),
+          if (occupancy == OccupancyType.tenant)
+            _SummaryLine(
+              label: 'Agreement',
+              value: agreementStart == null
+                  ? dash
+                  : '${formatDate(agreementStart)}  →  ${formatDate(agreementEnd)}',
+            ),
         ],
       ),
     );

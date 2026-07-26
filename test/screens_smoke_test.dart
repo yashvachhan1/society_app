@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:society_app/features/auth/screens/language_screen.dart';
+import 'package:society_app/features/common/screens/empty_module_screen.dart';
 import 'package:society_app/features/home/screens/home_screen.dart';
 import 'package:society_app/features/profile/screens/profile_screen.dart';
 import 'package:society_app/features/registration/screens/pending_approval_screen.dart';
@@ -26,24 +27,27 @@ void main() {
     expect(find.text('मराठी'), findsOneWidget);
   });
 
-  testWidgets('HomeScreen shows the flat, society and membership records', (
+  testWidgets('HomeScreen shows the greeting and the module grid', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(420, 1400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
     await _pump(tester, const HomeScreen());
     expect(find.text('Good Morning!'), findsOneWidget);
-    expect(find.text('A-402 • Owner'), findsOneWidget);
-    // Flat details come straight from the `units` row.
-    expect(find.text('Flat Details'), findsOneWidget);
-    expect(find.text('985 sq.ft'), findsOneWidget);
-    expect(find.text('2BHK'), findsOneWidget);
-    // Society details come from the `societies` row.
-    expect(find.text('Society Details'), findsOneWidget);
-    expect(find.text('PNE/CO-OP/2015/4821'), findsOneWidget);
+    expect(find.text('Flat 301 • Owner'), findsOneWidget);
+    // "Services" is both the section heading and a module tile.
+    expect(find.text('Services'), findsWidgets);
+    expect(find.text('Complaints'), findsOneWidget);
+    expect(find.text('Recent Notices'), findsOneWidget);
+  });
+
+  testWidgets('EmptyModuleScreen explains that a module is not built', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      const EmptyModuleScreen(title: 'Notices', icon: Icons.campaign),
+    );
+    expect(find.text('Notices'), findsOneWidget);
+    expect(find.text('Nothing here yet'), findsOneWidget);
   });
 
   testWidgets('ProfileScreen shows every account and membership field', (
@@ -123,5 +127,45 @@ void main() {
     await tester.tap(find.text('Tap to upload'));
     await tester.pumpAndSettle();
     expect(find.text('Ready to submit'), findsOneWidget);
+  });
+
+  testWidgets('a tenant is asked for their rent agreement dates', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await _pump(tester, const RegistrationScreen());
+
+    // Walk to the flat step.
+    await tester.enterText(find.byType(TextField).first, '9876543210');
+    await tester.pump();
+    await tester.tap(find.text('Send OTP'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, '123456');
+    await tester.pump();
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Priya Mehta');
+    await tester.pump();
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sunrise Residency'));
+    await tester.pump();
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Flat 402'));
+    await tester.pumpAndSettle();
+
+    // As an owner there are no agreement fields.
+    expect(find.text('Agreement start'), findsNothing);
+
+    // Switching to Tenant reveals them — unit_occupancies.agreement_start/end.
+    await tester.tap(find.text('Tenant'));
+    await tester.pumpAndSettle();
+    expect(find.text('Agreement start'), findsOneWidget);
+    expect(find.text('Agreement end'), findsOneWidget);
   });
 }

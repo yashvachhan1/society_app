@@ -2,25 +2,22 @@
 
 Mirrors `test/screens_smoke_test.dart`.
 
-**Purpose** — every screen builds and renders its real data, and the
+**Purpose** — every screen builds and renders its key content, and the
 registration wizard works end to end.
 
 ## What's inside
 
-- `_pump(tester, screen)` — hosts a screen in a `MaterialApp` with Google Fonts
-  network fetching disabled
+- `_pump(tester, screen)` — hosts a screen with Google Fonts fetching disabled
 - `LanguageScreen` — all three languages are offered
-- `HomeScreen` — greeting, flat badge, and the values from the `units` and
-  `societies` records (985 sq.ft, 2BHK, the registration number)
+- `HomeScreen` — greeting, flat badge, module grid, notices section
+- `EmptyModuleScreen` — the "Nothing here yet" placeholder
 - `ProfileScreen` — the `users` columns (phone, email, last login) and the
   `memberships` columns (member since), plus Logout
 - `PendingApprovalScreen` — the approval timeline
 - **Registration wizard walkthrough** — phone → OTP → name → society → flat →
-  proof, asserting each step's title and that upload unlocks submit
+  proof
 
 ## Notes
 
-- "English" appears twice on the language screen (native + English label), so
-  that assertion uses `findsWidgets`.
-- The data-heavy screens use a tall surface (420×1400/1600) so every card fits
-  without scrolling.
+"English" (language screen) and "Services" (home) each appear twice, so those
+assertions use `findsWidgets`. The data-heavy screens use a tall test surface.
