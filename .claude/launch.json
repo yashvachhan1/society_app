@@ -4,13 +4,13 @@
     {
       "name": "society-app",
       "runtimeExecutable": "C:\\flutter\\bin\\flutter.bat",
-      "runtimeArgs": ["run", "-d", "web-server", "--web-hostname", "0.0.0.0", "--web-port", "5000"],
+      "runtimeArgs": ["run", "--release", "-d", "web-server", "--web-hostname", "0.0.0.0", "--web-port", "5000"],
       "port": 5000
     },
     {
       "name": "web-static",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5050", "--directory", "build/web"],
+      "runtimeArgs": ["-m", "http.server", "5050", "--bind", "0.0.0.0", "--directory", "build/web"],
       "port": 5050
     }
   ]

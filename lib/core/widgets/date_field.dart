@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -96,13 +97,18 @@ class DateField extends StatelessWidget {
   }
 }
 
-/// A round avatar that shows the user's photo when `users.photo_url` is set and
-/// their initials otherwise, with an optional camera button to change it.
+/// A round avatar that shows the user's photo and their initials otherwise,
+/// with an optional camera button to change it.
+///
+/// [photoBytes] is a picture just chosen from the camera or gallery (not yet
+/// uploaded); [photoUrl] is a stored `users.photo_url`. Bytes win when both are
+/// present, so the new choice is shown immediately.
 class PhotoAvatar extends StatelessWidget {
   const PhotoAvatar({
     super.key,
     required this.initials,
     this.photoUrl,
+    this.photoBytes,
     this.radius = 45,
     this.onEdit,
     this.onLight = false,
@@ -110,15 +116,27 @@ class PhotoAvatar extends StatelessWidget {
 
   final String initials;
   final String? photoUrl;
+  final Uint8List? photoBytes;
   final double radius;
   final VoidCallback? onEdit;
 
   /// Set on a coloured header so the fallback uses white-on-tint.
   final bool onLight;
 
+  ImageProvider? get _image {
+    if (photoBytes != null && photoBytes!.isNotEmpty) {
+      return MemoryImage(photoBytes!);
+    }
+    if (photoUrl != null && photoUrl!.isNotEmpty) {
+      return NetworkImage(photoUrl!);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasPhoto = photoUrl != null && photoUrl!.isNotEmpty;
+    final image = _image;
+    final hasPhoto = image != null;
     final fg = onLight ? Colors.white : AppColors.primary;
 
     return Stack(
@@ -135,10 +153,7 @@ class PhotoAvatar extends StatelessWidget {
                 ? Border.all(color: Colors.white, width: 3)
                 : null,
             image: hasPhoto
-                ? DecorationImage(
-                    image: NetworkImage(photoUrl!),
-                    fit: BoxFit.cover,
-                  )
+                ? DecorationImage(image: image, fit: BoxFit.cover)
                 : null,
           ),
           child: hasPhoto

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +7,7 @@ import 'package:society_app/core/data/demo_data.dart';
 import 'package:society_app/core/models/models.dart';
 import 'package:society_app/core/theme/app_theme.dart';
 import 'package:society_app/core/utils/formatters.dart';
+import 'package:society_app/core/utils/photo_picker.dart';
 import 'package:society_app/core/widgets/widgets.dart';
 
 /// The resident's account.
@@ -22,6 +24,23 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late AppLanguage _language = DemoData.signedInUser.language;
+
+  /// The photo chosen from the camera or gallery, held until there is a backend
+  /// to upload it to (`users.photo_url`).
+  Uint8List? _photoBytes;
+
+  Future<void> _changeLanguage() async {
+    final picked = await showModalBottomSheet<AppLanguage>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _LanguageSheet(selected: _language),
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _language = picked);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +70,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               membership: membership,
               unit: unit,
               tower: tower,
+              photoBytes: _photoBytes,
             ),
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _AccountCard(user: user, language: _language),
+              child: _AccountCard(
+                user: user,
+                language: _language,
+                onEditLanguage: _changeLanguage,
+              ),
             ),
             const SizedBox(height: 12),
             Padding(
@@ -65,14 +89,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 society: society,
                 unit: unit,
                 tower: tower,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _LanguageCard(
-                selected: _language,
-                onChanged: (value) => setState(() => _language = value),
               ),
             ),
             const SizedBox(height: 16),
@@ -103,7 +119,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _EditProfileSheet(user: user),
+      builder: (context) => _EditProfileSheet(
+        user: user,
+        photoBytes: _photoBytes,
+        onPhotoChanged: (bytes) => setState(() => _photoBytes = bytes),
+      ),
     );
   }
 }
@@ -114,12 +134,14 @@ class _ProfileHeader extends StatelessWidget {
     required this.membership,
     required this.unit,
     required this.tower,
+    required this.photoBytes,
   });
 
   final AppUser user;
   final Membership membership;
   final Unit unit;
   final Tower tower;
+  final Uint8List? photoBytes;
 
   @override
   Widget build(BuildContext context) {
@@ -131,10 +153,12 @@ class _ProfileHeader extends StatelessWidget {
         children: [
           Stack(
             children: [
-              // users.photo_url — falls back to initials when not set
+              // users.photo_url — falls back to initials when not set.
+              // Changed from the Edit profile sheet, not from here.
               PhotoAvatar(
                 initials: user.initials,
                 photoUrl: user.photoUrl,
+                photoBytes: photoBytes,
                 onLight: true,
               ),
               if (membership.isActive)
@@ -219,10 +243,15 @@ class _HeaderChip extends StatelessWidget {
 
 /// The `users` row: name, phone, email, language, status, last login.
 class _AccountCard extends StatelessWidget {
-  const _AccountCard({required this.user, required this.language});
+  const _AccountCard({
+    required this.user,
+    required this.language,
+    required this.onEditLanguage,
+  });
 
   final AppUser user;
   final AppLanguage language;
+  final VoidCallback onEditLanguage;
 
   @override
   Widget build(BuildContext context) {
@@ -249,17 +278,11 @@ class _AccountCard extends StatelessWidget {
           isPlaceholder: !user.hasEmail,
         ),
         IconDetailRow(
-          icon: Icons.photo_camera_outlined,
-          label: 'Profile photo',
-          value: user.photoUrl == null ? 'Not added' : 'Added',
-          color: AppColors.primary,
-          isPlaceholder: user.photoUrl == null,
-        ),
-        IconDetailRow(
           icon: Icons.translate_outlined,
           label: 'Language',
           value: '${language.nativeLabel} (${language.label})',
           color: AppColors.warning,
+          onTap: onEditLanguage,
         ),
         IconDetailRow(
           icon: Icons.shield_outlined,
@@ -342,41 +365,39 @@ class _MembershipCard extends StatelessWidget {
   }
 }
 
-/// `users.language` — the one setting the app actually stores today.
-class _LanguageCard extends StatelessWidget {
-  const _LanguageCard({required this.selected, required this.onChanged});
+/// Language picker opened by tapping the Language row in Account Details.
+class _LanguageSheet extends StatelessWidget {
+  const _LanguageSheet({required this.selected});
 
   final AppLanguage selected;
-  final ValueChanged<AppLanguage> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'App Language',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'App language',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final language in AppLanguage.values)
-                ChoiceChipTile(
-                  label: language.nativeLabel,
-                  selected: language == selected,
-                  onTap: () => onChanged(language),
-                ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 16),
+            for (final language in AppLanguage.values)
+              SelectableTile(
+                title: language.nativeLabel,
+                subtitle: language.label,
+                selected: language == selected,
+                onTap: () => Navigator.of(context).pop(language),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -405,9 +426,18 @@ class _LogoutButton extends StatelessWidget {
 /// Edits the columns a resident may change themselves: `users.name` and
 /// `users.email`. The phone number is the account identifier and is locked.
 class _EditProfileSheet extends StatefulWidget {
-  const _EditProfileSheet({required this.user});
+  const _EditProfileSheet({
+    required this.user,
+    required this.photoBytes,
+    required this.onPhotoChanged,
+  });
 
   final AppUser user;
+  final Uint8List? photoBytes;
+
+  /// Called as soon as a photo is picked or removed, so the screen behind the
+  /// sheet updates its header too.
+  final ValueChanged<Uint8List?> onPhotoChanged;
 
   @override
   State<_EditProfileSheet> createState() => _EditProfileSheetState();
@@ -416,7 +446,16 @@ class _EditProfileSheet extends StatefulWidget {
 class _EditProfileSheetState extends State<_EditProfileSheet> {
   late final _name = TextEditingController(text: widget.user.name);
   late final _email = TextEditingController(text: widget.user.email ?? '');
-  late String? _photoUrl = widget.user.photoUrl;
+  late Uint8List? _photoBytes = widget.photoBytes;
+
+  Future<void> _pickPhoto() async {
+    final hasPhoto = _photoBytes != null || widget.user.photoUrl != null;
+    final picked = await pickProfilePhoto(context, allowRemove: hasPhoto);
+    if (picked == null || !mounted) return;
+    final bytes = picked.isRemoval ? null : picked.bytes;
+    setState(() => _photoBytes = bytes);
+    widget.onPhotoChanged(bytes);
+  }
 
   @override
   void dispose() {
@@ -447,32 +486,35 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
             ),
           ),
           const SizedBox(height: 18),
+          // users.photo_url — camera or gallery
           Center(
             child: Column(
               children: [
                 PhotoAvatar(
                   initials: widget.user.initials,
-                  photoUrl: _photoUrl,
-                  radius: 38,
-                  onEdit: () => setState(
-                    () => _photoUrl = _photoUrl == null ? 'profile.jpg' : null,
-                  ),
+                  photoUrl: widget.user.photoUrl,
+                  photoBytes: _photoBytes,
+                  radius: 40,
+                  onEdit: _pickPhoto,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  _photoUrl == null ? 'Add a photo' : 'Photo added',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: _photoUrl == null
-                        ? AppColors.textSecondary
-                        : AppColors.success,
+                TextButton(
+                  onPressed: _pickPhoto,
+                  child: Text(
+                    _photoBytes == null && widget.user.photoUrl == null
+                        ? 'Add profile photo'
+                        : 'Change photo',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           LabelledField(
             label: 'Full name',
             required: true,

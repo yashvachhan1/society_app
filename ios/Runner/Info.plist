@@ -66,5 +66,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Profile photo (users.photo_url) — required by image_picker on iOS -->
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo for your profile picture.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a profile picture from your photos.</string>
 </dict>
 </plist>

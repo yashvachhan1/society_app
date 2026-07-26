@@ -20,13 +20,4 @@ class AppRoutes {
   static const billing = '/billing';
   static const notices = '/notices';
   static const profile = '/profile';
-
-  // Modules reachable from the home grid. Only the Account tab has real data
-  // today; these open an empty state until their module is built.
-  static const services = '/home/services';
-  static const complaints = '/home/complaints';
-  static const guests = '/home/guests';
-  static const staff = '/home/staff';
-  static const family = '/home/family';
-  static const vehicles = '/home/vehicles';
 }

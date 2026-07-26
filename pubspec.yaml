@@ -55,6 +55,9 @@ dependencies:
   # Utils
   intl: ^0.20.2
 
+  # Profile photo — camera or gallery (users.photo_url)
+  image_picker: ^1.1.2
+
   # NOTE: Native plugins (image_picker, file_picker, permission_handler,
   # url_launcher, share_plus, mobile_scanner, flutter_secure_storage,
   # shared_preferences, cached_network_image) are added per-feature when

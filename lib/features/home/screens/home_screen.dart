@@ -2,62 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:society_app/core/constants/app_constants.dart';
+import 'package:society_app/core/data/demo_data.dart';
 import 'package:society_app/core/theme/app_theme.dart';
 import 'package:society_app/core/widgets/widgets.dart';
-import '../models/home_module.dart';
 
+/// The resident's home tab.
+///
+/// The header identifies who is signed in and which flat they belong to — all
+/// of it read from the `users`, `memberships`, `units` and `towers` records.
+/// Below that the screen is intentionally empty: billing, notices, complaints
+/// and the other modules are not built yet, and nothing is shown that the
+/// backend cannot actually provide.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const List<HomeModule> _modules = [
-    HomeModule(icon: Icons.receipt_long, label: 'Billing', color: Color(0xFF1565C0), route: AppRoutes.billing),
-    HomeModule(icon: Icons.campaign, label: 'Notices', color: Color(0xFF6A1B9A), route: AppRoutes.notices),
-    HomeModule(icon: Icons.build_circle, label: 'Complaints', color: Color(0xFFE65100), route: AppRoutes.complaints),
-    HomeModule(icon: Icons.qr_code_scanner, label: 'Guests', color: Color(0xFF00695C), route: AppRoutes.guests),
-    HomeModule(icon: Icons.handyman, label: 'Services', color: Color(0xFF00838F), route: AppRoutes.services),
-    HomeModule(icon: Icons.people, label: 'Staff', color: Color(0xFF37474F), route: AppRoutes.staff),
-    HomeModule(icon: Icons.family_restroom, label: 'Family', color: Color(0xFF2E7D32), route: AppRoutes.family),
-    HomeModule(icon: Icons.directions_car, label: 'Vehicles', color: Color(0xFF4527A0), route: AppRoutes.vehicles),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          const _HomeHeader(),
+          _HomeHeader(),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  const SectionHeader(title: 'Services'),
-                  const SizedBox(height: 14),
-                  const _ModuleGrid(modules: _modules),
-                  const SizedBox(height: 22),
-                  SectionHeader(
-                    title: 'Recent Notices',
-                    actionLabel: 'See all',
-                    onAction: () => context.go(AppRoutes.notices),
-                  ),
-                  const SizedBox(height: 12),
-                  const _MiniNoticeCard(
-                    title: 'Water Supply Shutdown',
-                    description: 'No water on 5th June from 10 AM to 2 PM',
-                    priority: 'Urgent',
-                    time: '2h ago',
-                  ),
-                  const SizedBox(height: 10),
-                  const _MiniNoticeCard(
-                    title: 'Society Meeting',
-                    description: 'Monthly meeting on Sunday at 11 AM in the clubhouse',
-                    priority: 'Important',
-                    time: '1d ago',
-                  ),
-                ],
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(
+                child: EmptyState(
+                  icon: Icons.inbox_outlined,
+                  title: 'Nothing here yet',
+                  message:
+                      'Bills, notices and complaints will appear here once those '
+                      'modules are enabled for your society.',
+                ),
               ),
             ),
           ),
@@ -93,33 +69,47 @@ class _HeaderContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = DemoData.signedInUser;
+    final membership = DemoData.currentMembership;
+    final unit = DemoData.currentUnit;
+    final tower = DemoData.currentTower;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Good Morning!',
-                  style: TextStyle(color: Colors.white70, fontSize: 13)),
-              SizedBox(height: 3),
-              Text('Rahul Sharma',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  )),
-              SizedBox(height: 6),
-              _FlatBadge(),
+              const Text(
+                'Good Morning!',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                user.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              _FlatBadge(
+                label: '${unit.labelWith(tower)} • ${membership.role.label}',
+              ),
             ],
           ),
         ),
         GestureDetector(
           onTap: () => context.go(AppRoutes.profile),
-          child: const CircleAvatar(
+          child: PhotoAvatar(
+            initials: user.initials,
+            photoUrl: user.photoUrl,
             radius: 24,
-            backgroundColor: Colors.white24,
-            child: Icon(Icons.person, color: Colors.white, size: 28),
+            onLight: true,
           ),
         ),
       ],
@@ -128,7 +118,9 @@ class _HeaderContent extends StatelessWidget {
 }
 
 class _FlatBadge extends StatelessWidget {
-  const _FlatBadge();
+  const _FlatBadge({required this.label});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -138,156 +130,9 @@ class _FlatBadge extends StatelessWidget {
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text('Flat 301 • Owner',
-          style: TextStyle(color: Colors.white, fontSize: 12)),
-    );
-  }
-}
-
-class _ModuleGrid extends StatelessWidget {
-  const _ModuleGrid({required this.modules});
-
-  final List<HomeModule> modules;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (final m in modules.take(4)) _ModuleTile(module: m),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (final m in modules.skip(4)) _ModuleTile(module: m),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _ModuleTile extends StatelessWidget {
-  const _ModuleTile({required this.module});
-
-  final HomeModule module;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.go(module.route),
-      child: SizedBox(
-        width: 72,
-        child: Column(
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: module.color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(module.icon, color: module.color, size: 30),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              module.label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MiniNoticeCard extends StatelessWidget {
-  const _MiniNoticeCard({
-    required this.title,
-    required this.description,
-    required this.priority,
-    required this.time,
-  });
-
-  final String title;
-  final String description;
-  final String priority;
-  final String time;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = StatusChip.colorForStatus(priority);
-    return AppCard(
-      padding: const EdgeInsets.all(14),
-      borderRadius: 14,
-      onTap: () => context.go(AppRoutes.notices),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 4,
-            height: 50,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    StatusChip(label: priority, color: color),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  time,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 12),
       ),
     );
   }

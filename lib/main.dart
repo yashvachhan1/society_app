@@ -46,54 +46,7 @@ final _router = GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(
-              path: AppRoutes.home,
-              builder: (_, _) => const HomeScreen(),
-              routes: [
-                GoRoute(
-                  path: 'services',
-                  builder: (_, _) => const EmptyModuleScreen(
-                    title: 'Home Services',
-                    icon: Icons.handyman,
-                  ),
-                ),
-                GoRoute(
-                  path: 'complaints',
-                  builder: (_, _) => const EmptyModuleScreen(
-                    title: 'Complaints',
-                    icon: Icons.build_circle,
-                  ),
-                ),
-                GoRoute(
-                  path: 'guests',
-                  builder: (_, _) => const EmptyModuleScreen(
-                    title: 'Guests',
-                    icon: Icons.qr_code_scanner,
-                  ),
-                ),
-                GoRoute(
-                  path: 'staff',
-                  builder: (_, _) => const EmptyModuleScreen(
-                    title: 'Staff',
-                    icon: Icons.people,
-                  ),
-                ),
-                GoRoute(
-                  path: 'family',
-                  builder: (_, _) => const EmptyModuleScreen(
-                    title: 'Family',
-                    icon: Icons.family_restroom,
-                  ),
-                ),
-                GoRoute(
-                  path: 'vehicles',
-                  builder: (_, _) => const EmptyModuleScreen(
-                    title: 'Vehicles',
-                    icon: Icons.directions_car,
-                  ),
-                ),
-              ],
-            ),
+            GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
           ],
         ),
         StatefulShellBranch(

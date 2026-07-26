@@ -6,15 +6,19 @@ Mirrors `lib/core/constants/app_constants.dart`.
 
 ## What's inside
 
-- `AppConstants` — `appName`, `appVersion`.
+- `AppConstants` — `appName` ("Society App"), `appVersion`.
 - `AppRoutes`:
-  - Onboarding: `splash` `/`, `language`, `register`, `login`, `otp`,
-    `pendingApproval`
-  - Bottom-nav tabs: `home`, `billing`, `notices`, `profile`
-  - Home-grid modules (inside the Home tab): `services`, `complaints`,
-    `guests`, `staff`, `family`, `vehicles`
+  - Onboarding: `splash` `/`, `language` `/language`, `register` `/register`,
+    `login` `/login`, `otp` `/otp`, `pendingApproval` `/pending-approval`
+  - Bottom-nav tabs: `home` `/home`, `billing` `/billing`, `notices` `/notices`,
+    `profile` `/profile`
+
+## Used by
+
+`lib/main.dart` (route table) and any screen that navigates.
 
 ## Notes
 
-Never write a route string inline. Module routes currently resolve to
-`EmptyModuleScreen`.
+Never write a route string inline — add a constant here first, otherwise a typo
+becomes a silent dead link. The old `/home/...` module routes were removed with
+the home grid; they come back with their features.

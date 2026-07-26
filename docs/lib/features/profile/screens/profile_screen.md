@@ -6,18 +6,23 @@ Mirrors `lib/features/profile/screens/profile_screen.dart`.
 
 ## What's inside
 
-- `ProfileScreen` (StatefulWidget) — holds the selected `AppLanguage`
-- `_ProfileHeader` — blue header with `PhotoAvatar` (`users.photo_url`, falling
-  back to initials), a verified tick when the membership is active, the name,
-  and `_HeaderChip` rows for the flat and role
+- `ProfileScreen` (StatefulWidget) — holds the selected `AppLanguage` and the
+  photo bytes chosen from the camera or gallery
+  - `_changeLanguage()` — opens `_LanguageSheet`
+- `_ProfileHeader` — blue header with a `PhotoAvatar` (display only), a verified
+  tick when the membership is active, the name, and `_HeaderChip` rows for the
+  flat and role
 - `_AccountCard` — the **`users`** row: full name, mobile (login ID), email,
-  profile photo, language, account status, last login
+  **language** (tappable → language sheet), account status, last login
 - `_MembershipCard` — the **`memberships`** row: society, flat, role, status,
   member since, and "Valid till" when `end_date` is set
-- `_LanguageCard` — `users.language`
+- `_LanguageSheet` — the language picker
 - `_LogoutButton`
-- `_EditProfileSheet` — edits `photo_url`, `name` and `email`; the phone number
-  is locked because it is the account identifier
+- `_EditProfileSheet` — the one place the resident edits their own record:
+  **profile photo** (camera / gallery / remove, via `pickProfilePhoto`),
+  `users.name` and `users.email`. The phone number is locked because it is the
+  account identifier. Picking a photo calls `onPhotoChanged` so the header
+  behind the sheet updates immediately.
 
 ## Route
 
@@ -25,5 +30,6 @@ Mirrors `lib/features/profile/screens/profile_screen.dart`.
 
 ## Notes
 
-Only columns the resident owns are editable. Society details, unit structure and
-membership status are set by the admin and shown read-only.
+Editing lives in one place — the Edit profile sheet (pencil icon in the app
+bar). The header avatar and the Account rows only display; language is the one
+exception, changed in place from its row.

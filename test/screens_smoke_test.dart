@@ -27,16 +27,21 @@ void main() {
     expect(find.text('मराठी'), findsOneWidget);
   });
 
-  testWidgets('HomeScreen shows the greeting and the module grid', (
+  testWidgets('HomeScreen shows the resident header and nothing else', (
     tester,
   ) async {
     await _pump(tester, const HomeScreen());
+
+    // Header values come from the users / memberships / units records.
     expect(find.text('Good Morning!'), findsOneWidget);
-    expect(find.text('Flat 301 • Owner'), findsOneWidget);
-    // "Services" is both the section heading and a module tile.
-    expect(find.text('Services'), findsWidgets);
-    expect(find.text('Complaints'), findsOneWidget);
-    expect(find.text('Recent Notices'), findsOneWidget);
+    expect(find.text('Rahul Sharma'), findsOneWidget);
+    expect(find.text('A-402 • Owner'), findsOneWidget);
+
+    // Everything below is intentionally empty until the modules are built.
+    expect(find.text('Nothing here yet'), findsOneWidget);
+    expect(find.text('Recent Notices'), findsNothing);
+    expect(find.text('Billing'), findsNothing);
+    expect(find.text('Complaints'), findsNothing);
   });
 
   testWidgets('EmptyModuleScreen explains that a module is not built', (

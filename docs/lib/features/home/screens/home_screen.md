@@ -2,20 +2,18 @@
 
 Mirrors `lib/features/home/screens/home_screen.dart`.
 
-**Purpose** — the resident dashboard: greeting header, the module grid and a
-preview of recent notices.
+**Purpose** — the resident's home tab: who is signed in and which flat they
+belong to. Everything below the header is intentionally empty.
 
 ## What's inside
 
 - `HomeScreen` (StatelessWidget)
-- `const` module list (label → route): Billing, Notices, Complaints, Guests,
-  **Services**, Staff, Family, Vehicles
-- `_HomeHeader` / `_HeaderContent` — flat blue header with a rounded bottom:
-  greeting, name, `_FlatBadge` ("Flat 301 • Owner") and an avatar that opens the
-  Account tab
-- `_ModuleGrid` / `_ModuleTile` — two rows with `spaceBetween`, 64px rounded
-  icon tiles
-- `_MiniNoticeCard` — notice preview with a left colour accent bar
+- `_HomeHeader` / `_HeaderContent` — blue header with a rounded bottom:
+  greeting, the user's name (`users.name`), a `_FlatBadge`
+  ("A-402 • Owner", from `units` + `towers` + `memberships`) and a
+  `PhotoAvatar` (`users.photo_url`, initials fallback) that opens the Account tab
+- `_FlatBadge` — the white pill under the name
+- An `EmptyState` — "Nothing here yet"
 
 ## Route
 
@@ -23,8 +21,7 @@ preview of recent notices.
 
 ## Notes
 
-- Every module tile stays visible so the shape of the product is clear; the
-  modules that are not built yet open `EmptyModuleScreen`. Only the Account tab
-  has real data today.
-- "Services" appears twice on this screen (section heading + module tile); the
-  smoke test accounts for that.
+The module grid and the sample notices were removed on purpose: those modules
+do not exist yet, and nothing is shown that the backend cannot provide. The
+resident's real data lives on the Account tab. Modules return with their
+features.

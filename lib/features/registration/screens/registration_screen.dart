@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +7,7 @@ import 'package:society_app/core/data/demo_data.dart';
 import 'package:society_app/core/models/models.dart';
 import 'package:society_app/core/theme/app_theme.dart';
 import 'package:society_app/core/utils/formatters.dart';
+import 'package:society_app/core/utils/photo_picker.dart';
 import 'package:society_app/core/widgets/widgets.dart';
 
 /// Resident self-registration (requirement R4.1.5): the resident picks their
@@ -43,7 +45,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   AppLanguage _language = AppLanguage.en;
-  String? _photoName;
+  Uint8List? _photoBytes;
+
+  Future<void> _changePhoto() async {
+    final picked = await pickProfilePhoto(
+      context,
+      allowRemove: _photoBytes != null,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _photoBytes = picked.isRemoval ? null : picked.bytes);
+  }
 
   // memberships.society_id
   int? _societyId;
@@ -252,19 +263,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             children: [
               PhotoAvatar(
                 initials: _initialsFrom(_name.text),
-                photoUrl: _photoName,
+                photoBytes: _photoBytes,
                 radius: 42,
-                onEdit: () => setState(
-                  () => _photoName = _photoName == null ? 'profile.jpg' : null,
-                ),
+                onEdit: _changePhoto,
               ),
               const SizedBox(height: 10),
               Text(
-                _photoName == null ? 'Add a photo (optional)' : 'Photo added',
+                _photoBytes == null ? 'Add a photo (optional)' : 'Photo added',
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
-                  color: _photoName == null
+                  color: _photoBytes == null
                       ? AppColors.textSecondary
                       : AppColors.success,
                 ),
@@ -453,7 +462,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           occupancy: _occupancy,
           name: _name.text.trim(),
           phone: _phone.text.trim(),
-          hasPhoto: _photoName != null,
+          hasPhoto: _photoBytes != null,
           agreementStart: _agreementStart,
           agreementEnd: _agreementEnd,
         ),

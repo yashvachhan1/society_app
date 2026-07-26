@@ -13,6 +13,7 @@ class IconDetailRow extends StatelessWidget {
     required this.value,
     required this.color,
     this.isPlaceholder = false,
+    this.onTap,
   });
 
   final IconData icon;
@@ -23,8 +24,25 @@ class IconDetailRow extends StatelessWidget {
   /// Greys the value out when the field is empty (e.g. "Not added").
   final bool isPlaceholder;
 
+  /// When set the row becomes tappable and shows a chevron — used for the
+  /// fields the resident can edit in place (photo, language).
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
+    final row = _content();
+    if (onTap == null) return row;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: row,
+      ),
+    );
+  }
+
+  Widget _content() {
     return Row(
       children: [
         Container(
@@ -63,6 +81,12 @@ class IconDetailRow extends StatelessWidget {
             ],
           ),
         ),
+        if (onTap != null)
+          const Icon(
+            Icons.chevron_right_rounded,
+            size: 20,
+            color: AppColors.textSecondary,
+          ),
       ],
     );
   }
