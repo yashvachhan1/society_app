@@ -4,20 +4,14 @@
     {
       "name": "society-app",
       "runtimeExecutable": "C:\\flutter\\bin\\flutter.bat",
-      "runtimeArgs": ["run", "-d", "web-server", "--web-port", "5000"],
+      "runtimeArgs": ["run", "-d", "web-server", "--web-hostname", "0.0.0.0", "--web-port", "5000"],
       "port": 5000
     },
     {
-      "name": "admin-static",
+      "name": "web-static",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5051", "--bind", "0.0.0.0", "--directory", "apps/admin/build/web"],
-      "port": 5051
-    },
-    {
-      "name": "owner-static",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5052", "--directory", "apps/owner/build/web"],
-      "port": 5052
+      "runtimeArgs": ["-m", "http.server", "5050", "--directory", "build/web"],
+      "port": 5050
     }
   ]
 }
